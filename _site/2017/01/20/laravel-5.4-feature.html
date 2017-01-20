@@ -1,0 +1,225 @@
+<p>Laravel 5.3才剛更新到產品上沒多久就出5.4了Orz…要逼死誰啊XD
+但是許多的新特性的確不錯，來紀錄一下新特性的內容吧！</p>
+
+<h3 id="1-includes-two-new-middleware">1. Includes Two New Middleware</h3>
+<p>新增兩個Middleware分別是TrimStrings與ConvertEmptyStringsToNull，TrimStrings的功能是把進來的Request裡面的內容自動做trim的動作，避免使用者多塞空格進來，ConvertEmptyStringsToNull則是當Request裡面的內容是”“空字串的話，會自動轉成NULL方便內容判斷，例如：</p>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"vat"</span> <span class="na">value=</span><span class="s">""</span><span class="nt">&gt;</span>
+</code></pre>
+</div>
+<p>套用前</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>dd(request('vat'));  
+// ''
+</code></pre>
+</div>
+<p>套用後</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>dd(request('vat'));    
+// null
+</code></pre>
+</div>
+<h3 id="2-automatic-facades">2. Automatic Facade’s</h3>
+<p>快速建立Facade的方式，方法如下：\
+<strong>建立</strong></p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>namespace App;
+
+class Zonda 
+{
+    public function zurf()
+    {
+        return ‘Zurfing’;
+    }
+}
+</code></pre>
+</div>
+<p><strong>使用</strong></p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>use Facades\ {
+    App\Zonda
+};
+
+Route::get('/', function () {
+    return Zonda::zurf();
+});
+</code></pre>
+</div>
+
+<h3 id="3-laravel-dusk">3. Laravel Dusk</h3>
+<p>Laravel Dusk是一整套新的測試工具包，原本的Laravel測試在遇到AJAX之類的JavaScript時，
+因為原本使用的”Symfony BrowserKit”無法支援類似情景就不方便寫測試，
+現在Laravel Dusk支援諸如點擊按鈕或連結時的特效，類似拖動或是下拉式選單，
+除此之外，也可以進行輸入帳號密碼登入，還有模擬同時開啟多個瀏覽器來測試socket之類的功能，
+也會新增.env.dusk來專門用來做測試使用，底層的實作是使用了ChromeDriver與
+Facebook Php-webdriver，相信有在寫測試的人會喜歡這個新功能。</p>
+
+<h3 id="4-laravel-elixir-will-be-renamed-to-laravel-mix">4. Laravel Elixir Will Be Renamed To Laravel Mix</h3>
+<p>原本的Elixir將改名為Mix，原因是底層的實作更換掉了，由原本的Gulp全面改成Webpack，
+這部分使用者如果本來就有在使用Webpack的應該可以很快上手，其實也只是把本來的設定檔換掉而已。</p>
+
+<h3 id="5-you-can-use-markdown-in-your-emails">5. You Can Use Markdown in Your Emails</h3>
+<p>現在可以在Email的內容裡面寫Markdown語法了，使用方式為</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>return $this-&gt;markdown('emails.thanks');
+</code></pre>
+</div>
+<p>除此之外，還可以使用新的Balde帶來的元件，</p>
+<ul>
+  <li>button</li>
+  <li>footer</li>
+  <li>header</li>
+  <li>layout</li>
+  <li>message</li>
+  <li>panel</li>
+  <li>promotion</li>
+  <li>subcopy</li>
+  <li>table</li>
+</ul>
+
+<p>使用方法如下：</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>@component('mail::button', ['url' =&gt; $actionUrl, 'color' =&gt; $color])
+
+@endcomponent
+</code></pre>
+</div>
+
+<h3 id="6-route-improvements-are-coming-to-laravel-54">6. Route improvements are coming to Laravel 5.4</h3>
+<p>針對Route寫法的改善（原本的寫法還是可以使用），原本的方式：</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>Route::get('user/{id}/profile', function ($id) {
+    //
+})-&gt;name('profile');
+</code></pre>
+</div>
+<p>改善後的方式：</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>Route::name('profile')-&gt;get('user/{id}/profile', function ($id) {
+    // some closure action...
+});
+</code></pre>
+</div>
+<p>這樣改善之後可以對於找route的命名有一定的幫助，不然每次當route很多，開發者太多沒好好按照格式寫的話，往往都會找name找得很辛苦。
+另外也可以使用以下幾種寫法，</p>
+
+<p><strong>Registering a route name and a middleware</strong></p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>Route::name('users.index')-&gt;middleware('auth')-&gt;get('users', function () {
+    // some closure action...
+});
+</code></pre>
+</div>
+<p><strong>Registering a middleware with a route prefix and group</strong></p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>Route::middleware('auth')-&gt;prefix('api')-&gt;group(function () {
+    // register some routes...
+});
+</code></pre>
+</div>
+<p><strong>Registering a middleware to a resource controller</strong></p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>Route::middleware('auth')-&gt;resource('photo', 'PhotoController');
+</code></pre>
+</div>
+
+<h3 id="7-json-based-language-files">7. JSON Based Language Files</h3>
+<p>針對多語系的處理方法新增了一個函數 <code class="highlighter-rouge">__()</code>，使用上如下：</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>__("Please enter your 4-digit verification number:")
+</code></pre>
+</div>
+<p>而在語系檔裡面就會從原本的 <code class="highlighter-rouge">resources/lang/en/auth.php</code>變成 <code class="highlighter-rouge">resources/lang/en.json</code>
+使用json檔做語系設定，內容改成：</p>
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="nt">"Please enter your 4-digit verification number:"</span><span class="p">:</span><span class="w"> </span><span class="s2">"men fadlak adkhel raqam al tareef"</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+<p>當要使用參數帶入的時候，使用方式如下：</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>__(
+    "Hello :name, you have :unread messages", 
+    ['name' =&gt; $user-&gt;name, 'unread' =&gt; $notifications-&gt;count]
+)
+</code></pre>
+</div>
+<p>而在Blade裡面也可以使用，方式如下：</p>
+<div class="highlighter-rouge"><pre class="highlight"><code>@trans(['name' =&gt; $user-&gt;name, 'unread' =&gt; $notifications-&gt;count])
+    Hello :name, you have :unread messages.
+@endtrans
+</code></pre>
+</div>
+
+<h3 id="8-laravel-blade-components-and-slots">8. Laravel Blade Components and Slots</h3>
+<p>Blade新增了一種加Slots的方式，</p>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code>// inc/alert.blade.php
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"alert"</span><span class="nt">&gt;</span>
+    
+<span class="nt">&lt;/div&gt;</span>
+
+//---
+
+// home.blade.php
+@extends('welcome')
+
+@section('content')
+<span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Home Page<span class="nt">&lt;/h1&gt;</span>
+    @component('inc.alert')
+        This is the alert message here.
+    @endcomponent
+<span class="nt">&lt;/div&gt;</span>
+@endsection
+</code></pre>
+</div>
+<p>@component裡面的內容會自動放進$slots裡面，另一種利用方式可以取代原本的extends與yield的作法，</p>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code>// layouts/app.blade.php
+<span class="nt">&lt;html&gt;</span>
+    <span class="nt">&lt;head&gt;</span>
+        <span class="nt">&lt;title&gt;&lt;/title&gt;</span>
+    <span class="nt">&lt;/head&gt;</span>
+
+    <span class="nt">&lt;body&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"container"</span><span class="nt">&gt;</span>
+            
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+
+//---
+
+// home.blade.php
+@component('layouts.app')
+    @slot('title')
+        Home Page
+    @endslot
+
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"col-6"</span><span class="nt">&gt;</span>
+        @component('inc.alert')
+            This is the alert message here.
+        @endcomponent
+        <span class="nt">&lt;h1&gt;</span>Welcome<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"col-6"</span><span class="nt">&gt;</span>
+        @component('inc.sidebar')
+            This is my sidebar text. 
+        @endcomponent
+    <span class="nt">&lt;/div&gt;</span>
+@endcomponent
+</code></pre>
+</div>
+<p><code class="highlighter-rouge">@slot</code>會把內容放進宣告的變數裡面，上例的情況就是’title’。</p>
+<h3 id="9-higher-order-messaging-for-collections">9. Higher Order Messaging for Collections</h3>
+<p>針對Collections需要處理集合中每個元素時，原本的作法會是類似：</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>$invoices-&gt;each(function($invoice) {
+    $invoice-&gt;pay();
+});
+</code></pre>
+</div>
+<p>現在可以直接使用如下的方式：</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>$invoices-&gt;each-&gt;pay();
+</code></pre>
+</div>
+<p>這改進包含所有的fallback寫法的function，例如：</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>$employees-&gt;reject(function($employee) {
+    return $employee-&gt;retired; 
+})-&gt;each(function($employee){
+    $employee-&gt;sendPayment();
+});
+</code></pre>
+</div>
+<p>也可以改寫成</p>
+<div class="language-php highlighter-rouge"><pre class="highlight"><code>$employees-&gt;reject-&gt;retired-&gt;each-&gt;sendPayment();
+</code></pre>
+</div>
+
+<hr />
+
+<p>以上9項是Laravel 5.4的新特性簡介，英文原文連結</p>
+
+<p><a href="https://laravel-news.com/category/laravel-5.4">https://laravel-news.com/category/laravel-5.4</a></p>
