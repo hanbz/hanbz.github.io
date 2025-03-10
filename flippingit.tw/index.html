@@ -251,10 +251,30 @@
             saturation: 0
         };
         
+        // 確保相框在最上層的函數
+        function ensureFrameOnTop() {
+            if (frameImage && canvas) {
+                canvas.remove(frameImage);
+                canvas.add(frameImage);
+                canvas.bringToFront(frameImage);
+                canvas.requestRenderAll();
+            }
+        }
+        
         // 在頁面加載完成後初始化
         window.onload = function() {
             initCanvas();
             initEvents();
+            
+            // 監聽畫布對象修改事件
+            canvas.on('object:modified', function() {
+                ensureFrameOnTop();
+            });
+            
+            // 監聽畫布渲染後事件
+            canvas.on('after:render', function() {
+                ensureFrameOnTop();
+            });
         };
         
         // 初始化畫布
@@ -368,6 +388,12 @@
                     
                     canvas.add(img);
                     canvas.setActiveObject(img);
+                    
+                    // 如果有相框，重新添加並確保在最上層
+                    if (frameImage) {
+                        ensureFrameOnTop();
+                    }
+                    
                     canvas.renderAll();
                     
                     // 隱藏載入中動畫
@@ -458,10 +484,7 @@
                     // 添加相框到畫布
                     frameImage = fabricImage;
                     canvas.add(frameImage);
-                    canvas.bringToFront(frameImage);
-                    
-                    // 強制重新渲染畫布
-                    canvas.requestRenderAll();
+                    ensureFrameOnTop();
                     
                     console.log('Frame added successfully');
                 } catch (error) {
@@ -574,10 +597,8 @@
                         // 更新圖片引用
                         image = newImg;
                         
-                        // 如果有相框，確保相框在圖片上方
-                        if (frameImage) {
-                            canvas.bringToFront(frameImage);
-                        }
+                        // 確保相框在最上層
+                        ensureFrameOnTop();
                         
                         canvas.renderAll();
                         
@@ -664,10 +685,8 @@
                             // 更新圖片引用
                             image = newImg;
                             
-                            // 如果有相框，確保相框在圖片上方
-                            if (frameImage) {
-                                canvas.bringToFront(frameImage);
-                            }
+                            // 確保相框在最上層
+                            ensureFrameOnTop();
                             
                             canvas.renderAll();
                             
