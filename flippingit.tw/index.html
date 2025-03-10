@@ -23,25 +23,25 @@
         <div class="app-container">
             <div class="upload-section">
                 <button class="upload-btn" id="upload-btn">上傳圖片</button>
-                <input type="file" id="file-input" class="file-input" accept="image/*">
-            </div>
-            
-            <div class="canvas-container">
-                <canvas id="canvas" width="800" height="600"></canvas>
+            <input type="file" id="file-input" class="file-input" accept="image/*">
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
                 <div class="no-image-message" id="no-image-message">請上傳一張圖片開始編輯</div>
-                <div class="loading" id="loading">
-                    <div class="loading-spinner"></div>
-                </div>
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
             </div>
-            
+        </div>
+        
             <div class="controls">
                 <div class="frames-section">
                     <h3 class="section-title">選擇相框</h3>
-                    <div class="frames-container">
+                    <div class="frames-container" id="frames-container">
                         <div class="frame-option" id="no-frame" data-frame="none">
                             <span>無框</span>
                         </div>
-                        <div class="frame-option" id="frame1" data-frame="frame" style="background-image: url('frame.png');"></div>
+                        <!-- 相框選項將由JavaScript動態載入 -->
                     </div>
                     <div class="slider-container frame-size-control" style="display: none;">
                         <label for="frame-size">相框大小: <span id="frame-size-value">20</span>px</label>
@@ -51,18 +51,18 @@
                 
                 <div class="adjustments-section">
                     <h3 class="section-title">調整參數</h3>
-                    <div class="slider-container">
-                        <label for="brightness">亮度: <span id="brightness-value">0</span></label>
-                        <input type="range" id="brightness" min="-100" max="100" value="0">
-                    </div>
-                    <div class="slider-container">
-                        <label for="contrast">對比度: <span id="contrast-value">0</span></label>
-                        <input type="range" id="contrast" min="-100" max="100" value="0">
-                    </div>
-                    <div class="slider-container">
-                        <label for="saturation">飽和度: <span id="saturation-value">0</span></label>
-                        <input type="range" id="saturation" min="-100" max="100" value="0">
-                    </div>
+                        <div class="slider-container">
+                            <label for="brightness">亮度: <span id="brightness-value">0</span></label>
+                            <input type="range" id="brightness" min="-100" max="100" value="0">
+                        </div>
+                        <div class="slider-container">
+                            <label for="contrast">對比度: <span id="contrast-value">0</span></label>
+                            <input type="range" id="contrast" min="-100" max="100" value="0">
+                        </div>
+                        <div class="slider-container">
+                            <label for="saturation">飽和度: <span id="saturation-value">0</span></label>
+                            <input type="range" id="saturation" min="-100" max="100" value="0">
+                        </div>
                     <button class="download-btn" id="apply-filters">套用調整</button>
                     <button class="download-btn" id="reset-filters" style="background-color: #f44336;">重置調整</button>
                 </div>
@@ -86,6 +86,7 @@
             saturation: 0
         };
         let framePadding = 20;
+        let frames = []; // 儲存所有相框資訊
         
         // 初始化
         window.onload = function() {
@@ -97,6 +98,9 @@
             
             // 監聽視窗大小變化
             window.addEventListener('resize', resizeCanvas);
+            
+            // 載入相框
+            loadFrames();
             
             initEvents();
         };
@@ -122,8 +126,6 @@
                         return;
                     }
                     
-                    const frameType = this.getAttribute('data-frame');
-                    
                     // 移除之前的選中狀態
                     document.querySelectorAll('.frame-option').forEach(opt => {
                         opt.classList.remove('selected');
@@ -132,12 +134,11 @@
                     // 添加新選中狀態
                     this.classList.add('selected');
                     
-                    // 顯示或隱藏相框大小控制
-                    const frameSizeControl = document.querySelector('.frame-size-control');
-                    frameSizeControl.style.display = frameType === 'none' ? 'none' : 'block';
+                    // 顯示相框大小控制
+                    document.querySelector('.frame-size-control').style.display = 'block';
                     
                     // 應用相框
-                    applyFrame(frameType);
+                    applyFrame(this.getAttribute('data-frame'));
                 });
             });
             
@@ -263,7 +264,65 @@
             reader.readAsDataURL(file);
         }
         
-        // 應用相框
+        // 載入相框
+        async function loadFrames() {
+            try {
+                const framesContainer = document.getElementById('frames-container');
+                
+                // 預設的相框列表
+                const frameFiles = [
+                    'Vertical Film Frame 01.png',
+                    'Vertical Film Frame 02.png',
+                    'Vertical Film Frame 03.png',
+                    'Vertical Film Frame 04.png',
+                    'Vertical Film Frame 05.png'
+                ];
+                
+                // 為每個相框創建選項
+                frameFiles.forEach(fileName => {
+                    const framePath = `frames/${fileName}`;
+                    
+                    frames.push({
+                        path: framePath,
+                        name: fileName
+                    });
+                    
+                    // 創建相框選項
+                    const frameOption = document.createElement('div');
+                    frameOption.className = 'frame-option';
+                    frameOption.setAttribute('data-frame', framePath);
+                    frameOption.style.backgroundImage = `url('${framePath}')`;
+                    
+                    // 添加點擊事件
+                    frameOption.addEventListener('click', function() {
+                        if (!currentImage) {
+                            alert('請先上傳一張圖片');
+                            return;
+                        }
+                        
+                        // 移除之前的選中狀態
+                        document.querySelectorAll('.frame-option').forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        
+                        // 添加新選中狀態
+                        this.classList.add('selected');
+                        
+                        // 顯示相框大小控制
+                        document.querySelector('.frame-size-control').style.display = 'block';
+                        
+                        // 應用相框
+                        applyFrame(this.getAttribute('data-frame'));
+                    });
+                    
+                    framesContainer.appendChild(frameOption);
+                });
+            } catch (error) {
+                console.error('載入相框失敗:', error);
+            }
+        }
+        
+        // 修改應用相框函數
         function applyFrame(frameType) {
             if (!currentImage) return;
             
@@ -294,7 +353,7 @@
                 document.getElementById('loading').style.display = 'none';
             };
             
-            frame.src = 'frame.png';
+            frame.src = frameType;
         }
         
         // 繪製相框
@@ -346,47 +405,47 @@
             
             document.getElementById('loading').style.display = 'flex';
             
-            // 創建臨時畫布
-            const tempCanvas = document.createElement('canvas');
+                // 創建臨時畫布
+                const tempCanvas = document.createElement('canvas');
             tempCanvas.width = currentImage.width;
             tempCanvas.height = currentImage.height;
             const tempCtx = tempCanvas.getContext('2d');
             
             // 繪製當前圖片到臨時畫布
             tempCtx.drawImage(currentImage.element, 0, 0, currentImage.width, currentImage.height);
-            
-            // 獲取圖片數據
+                
+                // 獲取圖片數據
             const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-            const data = imageData.data;
-            
+                const data = imageData.data;
+                
             // 應用濾鏡
-            const brightnessValue = 1 + filterValues.brightness / 100;
-            const contrastValue = 1 + filterValues.contrast / 100;
-            const saturationValue = 1 + filterValues.saturation / 100;
-            
-            for (let i = 0; i < data.length; i += 4) {
-                // 應用亮度
-                data[i] = data[i] * brightnessValue;
-                data[i + 1] = data[i + 1] * brightnessValue;
-                data[i + 2] = data[i + 2] * brightnessValue;
+                const brightnessValue = 1 + filterValues.brightness / 100;
+                const contrastValue = 1 + filterValues.contrast / 100;
+                const saturationValue = 1 + filterValues.saturation / 100;
                 
-                // 應用對比度
-                data[i] = ((data[i] - 128) * contrastValue) + 128;
-                data[i + 1] = ((data[i + 1] - 128) * contrastValue) + 128;
-                data[i + 2] = ((data[i + 2] - 128) * contrastValue) + 128;
-                
+                for (let i = 0; i < data.length; i += 4) {
+                    // 應用亮度
+                    data[i] = data[i] * brightnessValue;
+                    data[i + 1] = data[i + 1] * brightnessValue;
+                    data[i + 2] = data[i + 2] * brightnessValue;
+                    
+                    // 應用對比度
+                    data[i] = ((data[i] - 128) * contrastValue) + 128;
+                    data[i + 1] = ((data[i + 1] - 128) * contrastValue) + 128;
+                    data[i + 2] = ((data[i + 2] - 128) * contrastValue) + 128;
+                    
                 // 應用飽和度
-                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                data[i] = avg + saturationValue * (data[i] - avg);
-                data[i + 1] = avg + saturationValue * (data[i + 1] - avg);
-                data[i + 2] = avg + saturationValue * (data[i + 2] - avg);
+                    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    data[i] = avg + saturationValue * (data[i] - avg);
+                    data[i + 1] = avg + saturationValue * (data[i + 1] - avg);
+                    data[i + 2] = avg + saturationValue * (data[i + 2] - avg);
+                    
+                    // 確保顏色值在有效範圍內
+                    data[i] = Math.max(0, Math.min(255, data[i]));
+                    data[i + 1] = Math.max(0, Math.min(255, data[i + 1]));
+                    data[i + 2] = Math.max(0, Math.min(255, data[i + 2]));
+                }
                 
-                // 確保顏色值在有效範圍內
-                data[i] = Math.max(0, Math.min(255, data[i]));
-                data[i + 1] = Math.max(0, Math.min(255, data[i + 1]));
-                data[i + 2] = Math.max(0, Math.min(255, data[i + 2]));
-            }
-            
             // 更新臨時畫布
             tempCtx.putImageData(imageData, 0, 0);
             
