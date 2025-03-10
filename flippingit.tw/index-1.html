@@ -5,12 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>照片相框應用</title>
     <style>
+        :root {
+            --primary-color: #003781;
+            --primary-light: #1a4f98;
+            --primary-dark: #002a61;
+            --accent-color: #FF9E43;
+            --accent-light: #FFB166;
+            --accent-dark: #F78B1F;
+            --bg-color: #F5F8FC;
+            --paper-color: #FFFFFF;
+            --text-color: #1A1A1A;
+            --text-secondary: #666666;
+            --border-color: #E5E9F2;
+            --shadow-color: rgba(0, 55, 129, 0.08);
+            --gradient-start: #F0F5FF;
+            --gradient-end: #FFFFFF;
+        }
+
         body {
-            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            font-family: 'Noto Sans TC', sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+            padding: 0;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
         }
         
         .container {
@@ -32,23 +51,35 @@
             text-align: center;
             margin-bottom: 20px;
             padding: 20px;
-            background-color: #f9f9f9;
+            background-color: var(--bg-color);
             border-radius: 5px;
+            border: 2px dashed var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-section:hover {
+            border-color: var(--accent-color);
+            background-color: var(--gradient-start);
         }
         
         .upload-btn {
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
-            padding: 10px 20px;
+            padding: 1rem 2.5rem;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 4px var(--shadow-color);
         }
         
         .upload-btn:hover {
-            background-color: #45a049;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
         }
         
         .file-input {
@@ -82,15 +113,16 @@
             flex: 1;
             min-width: 300px;
             padding: 15px;
-            background-color: #f9f9f9;
+            background-color: var(--bg-color);
             border-radius: 5px;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
         }
         
         .section-title {
             margin-top: 0;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--primary-color);
             padding-bottom: 5px;
+            color: var(--primary-color);
         }
         
         .frames-container {
@@ -103,25 +135,27 @@
         .frame-option {
             width: 80px;
             height: 80px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--border-color);
             border-radius: 5px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: border-color 0.3s;
+            background-color: var(--paper-color);
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
         }
         
         .frame-option:hover {
-            border-color: #2196F3;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 8px var(--shadow-color);
         }
         
         .frame-option.selected {
-            border-color: #2196F3;
-            background-color: rgba(33, 150, 243, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px var(--primary-color);
         }
         
         .slider-container {
@@ -136,6 +170,12 @@
         input[type="range"] {
             width: 100%;
             margin-top: 5px;
+            background: var(--border-color);
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            background: var(--primary-color);
+            box-shadow: 0 2px 4px var(--shadow-color);
         }
         
         .download-section {
@@ -144,7 +184,7 @@
         }
         
         .download-btn {
-            background-color: #2196F3;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
             color: white;
             padding: 10px 20px;
             border: none;
@@ -155,7 +195,7 @@
         }
         
         .download-btn:hover {
-            background-color: #0b7dda;
+            background: linear-gradient(135deg, var(--accent-dark), var(--accent-color));
         }
         
         .loading {
@@ -164,7 +204,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -173,8 +214,8 @@
         }
         
         .loading-spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -191,61 +232,189 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #999;
+            color: var(--text-secondary);
             font-size: 18px;
             text-align: center;
+        }
+        
+        .header {
+            background-color: var(--paper-color);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), transparent);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: var(--paper-color);
+        }
+
+        .logo {
+            max-width: 180px;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .header-title {
+            font-family: 'Shippori Mincho', serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .header-title::before {
+            content: '|';
+            color: var(--accent-color);
+            opacity: 0.7;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        @media (max-width: 900px) {
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+                background-color: var(--paper-color);
+            }
+
+            .header-left {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .logo-container {
+                justify-content: center;
+                padding: 0.3rem 0.8rem;
+            }
+
+            .header-title {
+                font-size: 1.3rem;
+            }
+
+            .header-title::before {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.8rem;
+            }
+
+            .logo {
+                max-width: 150px;
+            }
+
+            .header-title {
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>照片相框應用</h1>
-        
-        <div class="upload-section">
-            <button class="upload-btn" id="upload-btn">上傳圖片</button>
-            <input type="file" id="file-input" class="file-input" accept="image/*">
-        </div>
-        
-        <div class="canvas-container">
-            <canvas id="canvas" width="800" height="600"></canvas>
-            <div class="no-image-message" id="no-image-message">請上傳一張圖片開始編輯</div>
-            <div class="loading" id="loading">
-                <div class="loading-spinner"></div>
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-container">
+                <img src="https://flippingit.tw/wp-content/uploads/2021/07/logo-%E6%A9%AB%E5%BC%8F-300x66.png.webp" alt="Flipping IT Logo" class="logo">
             </div>
+            <h2 class="header-title">照片相框編輯器</h2>
         </div>
-        
-        <div class="controls">
-            <div class="frames-section">
-                <h3 class="section-title">選擇相框</h3>
-                <div class="frames-container">
-                    <div class="frame-option" id="no-frame" data-frame="none">
-                        <span>無框</span>
-                    </div>
-                    <div class="frame-option" id="frame1" data-frame="frame" style="background-image: url('frame.png');"></div>
+        <div class="header-right">
+            <!-- 這裡可以放置其他功能按鈕，如說明文件、設定等 -->
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="app-container">
+            <div class="upload-section">
+                <button class="upload-btn" id="upload-btn">上傳圖片</button>
+                <input type="file" id="file-input" class="file-input" accept="image/*">
+            </div>
+            
+            <div class="canvas-container">
+                <canvas id="canvas" width="800" height="600"></canvas>
+                <div class="no-image-message" id="no-image-message">請上傳一張圖片開始編輯</div>
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
                 </div>
             </div>
             
-            <div class="adjustments-section">
-                <h3 class="section-title">調整參數</h3>
-                <div class="slider-container">
-                    <label for="brightness">亮度: <span id="brightness-value">0</span></label>
-                    <input type="range" id="brightness" min="-100" max="100" value="0">
+            <div class="controls">
+                <div class="frames-section">
+                    <h3 class="section-title">選擇相框</h3>
+                    <div class="frames-container">
+                        <div class="frame-option" id="no-frame" data-frame="none">
+                            <span>無框</span>
+                        </div>
+                        <div class="frame-option" id="frame1" data-frame="frame" style="background-image: url('frame.png');"></div>
+                    </div>
+                    <div class="slider-container frame-size-control" style="display: none;">
+                        <label for="frame-size">相框大小: <span id="frame-size-value">20</span>px</label>
+                        <input type="range" id="frame-size" min="10" max="100" value="20">
+                    </div>
                 </div>
-                <div class="slider-container">
-                    <label for="contrast">對比度: <span id="contrast-value">0</span></label>
-                    <input type="range" id="contrast" min="-100" max="100" value="0">
+                
+                <div class="adjustments-section">
+                    <h3 class="section-title">調整參數</h3>
+                    <div class="slider-container">
+                        <label for="brightness">亮度: <span id="brightness-value">0</span></label>
+                        <input type="range" id="brightness" min="-100" max="100" value="0">
+                    </div>
+                    <div class="slider-container">
+                        <label for="contrast">對比度: <span id="contrast-value">0</span></label>
+                        <input type="range" id="contrast" min="-100" max="100" value="0">
+                    </div>
+                    <div class="slider-container">
+                        <label for="saturation">飽和度: <span id="saturation-value">0</span></label>
+                        <input type="range" id="saturation" min="-100" max="100" value="0">
+                    </div>
+                    <button class="download-btn" id="apply-filters">套用調整</button>
+                    <button class="download-btn" id="reset-filters" style="background-color: #f44336;">重置調整</button>
                 </div>
-                <div class="slider-container">
-                    <label for="saturation">飽和度: <span id="saturation-value">0</span></label>
-                    <input type="range" id="saturation" min="-100" max="100" value="0">
-                </div>
-                <button class="download-btn" id="apply-filters">套用調整</button>
-                <button class="download-btn" id="reset-filters" style="background-color: #f44336;">重置調整</button>
             </div>
-        </div>
-        
-        <div class="download-section">
-            <button class="download-btn" id="download-btn">下載圖片</button>
+            
+            <div class="download-section">
+                <button class="download-btn" id="download-btn">下載圖片</button>
+            </div>
         </div>
     </div>
 
@@ -260,6 +429,7 @@
             contrast: 0,
             saturation: 0
         };
+        let framePadding = 20;
         
         // 初始化
         window.onload = function() {
@@ -304,6 +474,10 @@
                     // 添加新選中狀態
                     this.classList.add('selected');
                     
+                    // 顯示或隱藏相框大小控制
+                    const frameSizeControl = document.querySelector('.frame-size-control');
+                    frameSizeControl.style.display = frameType === 'none' ? 'none' : 'block';
+                    
                     // 應用相框
                     applyFrame(frameType);
                 });
@@ -323,6 +497,15 @@
             document.getElementById('saturation').addEventListener('input', function() {
                 document.getElementById('saturation-value').textContent = this.value;
                 filterValues.saturation = parseInt(this.value);
+            });
+            
+            // 相框大小調整
+            document.getElementById('frame-size').addEventListener('input', function() {
+                if (!frameImage) return;
+                
+                framePadding = parseInt(this.value);
+                document.getElementById('frame-size-value').textContent = framePadding;
+                redrawCanvas();
             });
             
             // 套用濾鏡
@@ -421,8 +604,7 @@
             const frame = new Image();
             frame.onload = function() {
                 frameImage = {
-                    element: frame,
-                    padding: 20
+                    element: frame
                 };
                 
                 redrawCanvas();
@@ -442,14 +624,13 @@
         function drawFrame() {
             if (!frameImage || !currentImage) return;
             
-            const padding = frameImage.padding;
-            const frameWidth = currentImage.width + padding * 2;
-            const frameHeight = currentImage.height + padding * 2;
+            const frameWidth = currentImage.width + framePadding * 2;
+            const frameHeight = currentImage.height + framePadding * 2;
             
             ctx.drawImage(
                 frameImage.element,
-                currentImage.x - padding,
-                currentImage.y - padding,
+                currentImage.x - framePadding,
+                currentImage.y - framePadding,
                 frameWidth,
                 frameHeight
             );
