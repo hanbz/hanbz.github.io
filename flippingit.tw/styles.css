@@ -15,6 +15,7 @@
     --gradient-end: #FFFFFF;
 }
 
+
 body {
     font-family: 'Noto Sans TC', sans-serif;
     margin: 0;
@@ -311,6 +312,72 @@ input[type="range"]::-webkit-slider-thumb {
     gap: 1rem;
 }
 
+.social-icons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.social-icon {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    transition: transform 0.3s ease, color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--gradient-start);
+}
+
+.social-icon:hover {
+    color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.banner {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('path-to-your-pattern.png') repeat;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+.banner-content {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.banner h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: white;
+}
+
+.banner p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
 .steps-guide {
     margin-top: 15px;
     display: flex;
@@ -393,6 +460,22 @@ input[type="range"]::-webkit-slider-thumb {
     .header-right {
         display: none;
     }
+
+    .banner {
+        padding: 2rem 1rem;
+    }
+
+    .banner h1 {
+        font-size: 2rem;
+    }
+
+    .banner p {
+        font-size: 1rem;
+    }
+
+    .social-icons {
+        margin-top: 1rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -429,5 +512,19 @@ input[type="range"]::-webkit-slider-thumb {
 
     .logo-container {
         padding: 0.2rem 0.5rem;
+    }
+
+    .banner {
+        padding: 1.5rem 0.8rem;
+    }
+
+    .banner h1 {
+        font-size: 1.5rem;
+    }
+
+    .social-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1.2rem;
     }
 } 
