@@ -1,62 +1,810 @@
-// 初始化Fabric.js畫布
-const canvas = new fabric.Canvas('canvas');
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖像編輯器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+        }
+        .btn {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .btn-danger {
+            background-color: #f44336;
+        }
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        .btn-primary {
+            background-color: #2196F3;
+        }
+        .btn-primary:hover {
+            background-color: #0b7dda;
+        }
+        .btn-warning {
+            background-color: #ff9800;
+        }
+        .btn-warning:hover {
+            background-color: #e68a00;
+        }
+        .canvas-container {
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            position: relative;
+        }
+        .panel {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .controls {
+            flex: 1;
+            min-width: 300px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .slider-container {
+            margin: 10px 0;
+        }
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .border-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .border-option {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.3s;
+        }
+        .border-option:hover {
+            border-color: #2196F3;
+        }
+        .border-option.selected {
+            border-color: #2196F3;
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+        .border-preview {
+            width: 60px;
+            height: 60px;
+            background-color: #eee;
+        }
+        .file-input {
+            display: none;
+        }
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            display: none;
+        }
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .color-picker {
+            margin-top: 5px;
+        }
+        .filter-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>圖像編輯器</h1>
+        
+        <div class="toolbar">
+            <button class="btn btn-primary" id="upload-btn">上傳圖片</button>
+            <input type="file" id="file-input" class="file-input" accept="image/*">
+            <button class="btn" id="crop-btn">裁切</button>
+            <button class="btn" id="apply-crop-btn" style="display: none;">確認裁切</button>
+            <button class="btn" id="cancel-crop-btn" style="display: none;">取消裁切</button>
+            <button class="btn" id="reset-btn">重置</button>
+            <button class="btn btn-primary" id="download-btn">下載圖片</button>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <div class="controls">
+                <div class="control-group">
+                    <h3>邊框樣式</h3>
+                    <div class="border-options">
+                        <div class="border-option" data-border="none">
+                            <div class="border-preview" style="border: none;"></div>
+                        </div>
+                        <div class="border-option" data-border="simple">
+                            <div class="border-preview" style="border: 5px solid #000;"></div>
+                        </div>
+                        <div class="border-option" data-border="double">
+                            <div class="border-preview" style="border: 10px double #000;"></div>
+                        </div>
+                        <div class="border-option" data-border="dashed">
+                            <div class="border-preview" style="border: 5px dashed #000;"></div>
+                        </div>
+                        <div class="border-option" data-border="dotted">
+                            <div class="border-preview" style="border: 5px dotted #000;"></div>
+                        </div>
+                        <div class="border-option" data-border="fancy1">
+                            <div class="border-preview" style="border: 10px solid transparent; background: linear-gradient(white, white) padding-box, linear-gradient(45deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff) border-box;"></div>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <label for="border-width">邊框寬度: <span id="border-width-value">5</span>px</label>
+                        <input type="range" id="border-width" min="1" max="30" value="5">
+                    </div>
+                    <div class="slider-container">
+                        <label for="border-color">邊框顏色:</label>
+                        <input type="color" id="border-color" value="#000000" class="color-picker">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>濾鏡與調整</h3>
+                    <div class="filter-controls">
+                        <div class="slider-container">
+                            <label for="brightness">亮度: <span id="brightness-value">0</span></label>
+                            <input type="range" id="brightness" min="-100" max="100" value="0">
+                        </div>
+                        <div class="slider-container">
+                            <label for="contrast">對比度: <span id="contrast-value">0</span></label>
+                            <input type="range" id="contrast" min="-100" max="100" value="0">
+                        </div>
+                        <div class="slider-container">
+                            <label for="saturation">飽和度: <span id="saturation-value">0</span></label>
+                            <input type="range" id="saturation" min="-100" max="100" value="0">
+                        </div>
+                        <div class="slider-container">
+                            <label for="blur">模糊: <span id="blur-value">0</span></label>
+                            <input type="range" id="blur" min="0" max="10" value="0" step="0.1">
+                        </div>
+                    </div>
+                    <button class="btn" id="apply-filters">套用濾鏡</button>
+                    <button class="btn btn-danger" id="reset-filters">重置濾鏡</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-// 加載圖片
-fabric.Image.fromURL('path/to/image.jpg', function(img) {
-  // 調整大小
-  img.scaleToWidth(500);
-  canvas.add(img);
-  canvas.centerObject(img);
-  canvas.setActiveObject(img);
-});
-
-// 自定義邊框函數
-function addCustomBorder(borderType) {
-  const activeObj = canvas.getActiveObject();
-  if (!activeObj) return;
-  
-  // 取得選中物件尺寸
-  const width = activeObj.getScaledWidth();
-  const height = activeObj.getScaledHeight();
-  const left = activeObj.left;
-  const top = activeObj.top;
-  
-  // 建立邊框 (這裡以矩形為例，可依需求自定義)
-  let border;
-  if (borderType === 'simple') {
-    border = new fabric.Rect({
-      width: width + 20,
-      height: height + 20,
-      left: left - 10,
-      top: top - 10,
-      fill: 'transparent',
-      stroke: '#000',
-      strokeWidth: 5
-    });
-  } else if (borderType === 'fancy') {
-    // 自定義花式邊框
-    // ...其他邊框樣式
-  }
-  
-  canvas.add(border);
-  canvas.sendToBack(border);
-}
-
-// 裁剪功能
-function cropImage() {
-  const activeObj = canvas.getActiveObject();
-  // 實現裁剪邏輯
-}
-
-// 下載功能
-function downloadImage() {
-  const dataURL = canvas.toDataURL({
-    format: 'png',
-    quality: 1
-  });
-  
-  const link = document.createElement('a');
-  link.href = dataURL;
-  link.download = 'edited-image.png';
-  link.click();
-}
+    <script>
+        // 初始化變數
+        let canvas, image, cropRect, activeBorder, filterValues;
+        let isCropping = false;
+        
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            initCanvas();
+            initEvents();
+            initFilterValues();
+        });
+        
+        // 初始化畫布
+        function initCanvas() {
+            canvas = new fabric.Canvas('canvas');
+            canvas.setWidth(800);
+            canvas.setHeight(600);
+            canvas.setBackgroundColor('#f0f0f0', canvas.renderAll.bind(canvas));
+        }
+        
+        // 初始化事件監聽
+        function initEvents() {
+            // 上傳圖片
+            document.getElementById('upload-btn').addEventListener('click', function() {
+                document.getElementById('file-input').click();
+            });
+            
+            document.getElementById('file-input').addEventListener('change', uploadImage);
+            
+            // 裁切相關
+            document.getElementById('crop-btn').addEventListener('click', startCropMode);
+            document.getElementById('apply-crop-btn').addEventListener('click', applyCrop);
+            document.getElementById('cancel-crop-btn').addEventListener('click', cancelCrop);
+            
+            // 重置
+            document.getElementById('reset-btn').addEventListener('click', resetImage);
+            
+            // 下載
+            document.getElementById('download-btn').addEventListener('click', downloadImage);
+            
+            // 邊框選項
+            document.querySelectorAll('.border-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const borderType = this.getAttribute('data-border');
+                    
+                    // 移除之前的選中狀態
+                    document.querySelectorAll('.border-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // 添加新選中狀態
+                    this.classList.add('selected');
+                    
+                    // 應用邊框
+                    applyBorder(borderType);
+                });
+            });
+            
+            // 邊框寬度
+            document.getElementById('border-width').addEventListener('input', function() {
+                document.getElementById('border-width-value').textContent = this.value;
+                if (activeBorder) {
+                    activeBorder.set('strokeWidth', parseInt(this.value));
+                    canvas.renderAll();
+                }
+            });
+            
+            // 邊框顏色
+            document.getElementById('border-color').addEventListener('change', function() {
+                if (activeBorder) {
+                    activeBorder.set('stroke', this.value);
+                    canvas.renderAll();
+                }
+            });
+            
+            // 濾鏡相關
+            document.querySelectorAll('#brightness, #contrast, #saturation, #blur').forEach(filter => {
+                filter.addEventListener('input', function() {
+                    document.getElementById(`${this.id}-value`).textContent = this.value;
+                    filterValues[this.id] = parseFloat(this.value);
+                });
+            });
+            
+            document.getElementById('apply-filters').addEventListener('click', applyFilters);
+            document.getElementById('reset-filters').addEventListener('click', resetFilters);
+        }
+        
+        // 初始化濾鏡值
+        function initFilterValues() {
+            filterValues = {
+                brightness: 0,
+                contrast: 0,
+                saturation: 0,
+                blur: 0
+            };
+        }
+        
+        // 上傳圖片
+        function uploadImage(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            
+            // 顯示載入中動畫
+            document.getElementById('loading').style.display = 'flex';
+            
+            reader.onload = function(event) {
+                fabric.Image.fromURL(event.target.result, function(img) {
+                    // 移除所有畫布物件
+                    canvas.clear();
+                    
+                    // 調整圖片大小適應畫布
+                    const canvasWidth = canvas.width;
+                    const canvasHeight = canvas.height;
+                    const imgWidth = img.width;
+                    const imgHeight = img.height;
+                    
+                    let scale = 1;
+                    if (imgWidth > canvasWidth || imgHeight > canvasHeight) {
+                        const scaleX = canvasWidth / imgWidth;
+                        const scaleY = canvasHeight / imgHeight;
+                        scale = Math.min(scaleX, scaleY) * 0.9;
+                    }
+                    
+                    img.scale(scale);
+                    
+                    // 置中圖片
+                    img.set({
+                        left: (canvasWidth - img.getScaledWidth()) / 2,
+                        top: (canvasHeight - img.getScaledHeight()) / 2,
+                        originX: 'left',
+                        originY: 'top'
+                    });
+                    
+                    // 保存原始圖片
+                    image = img;
+                    
+                    canvas.add(img);
+                    canvas.setActiveObject(img);
+                    canvas.renderAll();
+                    
+                    // 隱藏載入中動畫
+                    document.getElementById('loading').style.display = 'none';
+                });
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // 開始裁切模式
+        function startCropMode() {
+            if (!image) return;
+            
+            isCropping = true;
+            
+            // 禁用圖片移動
+            image.selectable = false;
+            
+            // 顯示確認和取消按鈕
+            document.getElementById('crop-btn').style.display = 'none';
+            document.getElementById('apply-crop-btn').style.display = 'inline-block';
+            document.getElementById('cancel-crop-btn').style.display = 'inline-block';
+            
+            // 創建裁切框
+            const imgLeft = image.left;
+            const imgTop = image.top;
+            const imgWidth = image.getScaledWidth();
+            const imgHeight = image.getScaledHeight();
+            
+            // 預設裁切區域大小為圖片的80%
+            cropRect = new fabric.Rect({
+                left: imgLeft + imgWidth * 0.1,
+                top: imgTop + imgHeight * 0.1,
+                width: imgWidth * 0.8,
+                height: imgHeight * 0.8,
+                fill: 'rgba(0, 0, 0, 0.2)',
+                stroke: '#2196F3',
+                strokeWidth: 2,
+                strokeDashArray: [5, 5],
+                cornerColor: '#2196F3',
+                transparentCorners: false,
+                cornerSize: 10
+            });
+            
+            canvas.add(cropRect);
+            canvas.setActiveObject(cropRect);
+            canvas.renderAll();
+        }
+        
+        // 應用裁切
+        function applyCrop() {
+            if (!image || !cropRect) return;
+            
+            const imgEl = image.getElement();
+            const scale = image.scaleX; // 假設 scaleX 和 scaleY 相同
+            
+            // 計算裁切框相對於圖片的位置和大小
+            const left = (cropRect.left - image.left) / scale;
+            const top = (cropRect.top - image.top) / scale;
+            const width = cropRect.width / scale;
+            const height = cropRect.height / scale;
+            
+            // 創建新的臨時 canvas 用於裁切
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            const ctx = tempCanvas.getContext('2d');
+            
+            // 裁切圖片
+            ctx.drawImage(imgEl, left, top, width, height, 0, 0, width, height);
+            
+            // 從裁切的 canvas 創建新圖片
+            fabric.Image.fromURL(tempCanvas.toDataURL(), function(newImg) {
+                // 清除畫布
+                canvas.clear();
+                
+                // 調整新圖片大小適應畫布
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+                const imgWidth = newImg.width;
+                const imgHeight = newImg.height;
+                
+                let newScale = 1;
+                if (imgWidth > canvasWidth || imgHeight > canvasHeight) {
+                    const scaleX = canvasWidth / imgWidth;
+                    const scaleY = canvasHeight / imgHeight;
+                    newScale = Math.min(scaleX, scaleY) * 0.9;
+                }
+                
+                newImg.scale(newScale);
+                
+                // 置中新圖片
+                newImg.set({
+                    left: (canvasWidth - newImg.getScaledWidth()) / 2,
+                    top: (canvasHeight - newImg.getScaledHeight()) / 2,
+                    originX: 'left',
+                    originY: 'top'
+                });
+                
+                // 更新原始圖片引用
+                image = newImg;
+                
+                canvas.add(newImg);
+                canvas.setActiveObject(newImg);
+                canvas.renderAll();
+                
+                // 完成裁切模式
+                exitCropMode();
+            });
+        }
+        
+        // 取消裁切
+        function cancelCrop() {
+            if (cropRect) {
+                canvas.remove(cropRect);
+                cropRect = null;
+            }
+            
+            if (image) {
+                image.selectable = true;
+            }
+            
+            exitCropMode();
+        }
+        
+        // 退出裁切模式
+        function exitCropMode() {
+            isCropping = false;
+            
+            // 隱藏確認和取消按鈕
+            document.getElementById('crop-btn').style.display = 'inline-block';
+            document.getElementById('apply-crop-btn').style.display = 'none';
+            document.getElementById('cancel-crop-btn').style.display = 'none';
+        }
+        
+        // 重置圖片
+        function resetImage() {
+            if (!image) return;
+            
+            // 刷新頁面以重置所有編輯
+            location.reload();
+        }
+        
+        // 下載圖片
+        function downloadImage() {
+            if (!image) return;
+            
+            // 暫時隱藏裁切框
+            if (cropRect) {
+                cropRect.visible = false;
+                canvas.renderAll();
+            }
+            
+            // 下載圖片
+            const dataURL = canvas.toDataURL({
+                format: 'png',
+                quality: 1
+            });
+            
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'edited-image.png';
+            link.click();
+            
+            // 恢復裁切框可見性
+            if (cropRect) {
+                cropRect.visible = true;
+                canvas.renderAll();
+            }
+        }
+        
+        // 應用邊框
+        function applyBorder(borderType) {
+            // 檢查是否有圖片
+            if (!image) return;
+            
+            // 移除之前的邊框
+            if (activeBorder) {
+                canvas.remove(activeBorder);
+                activeBorder = null;
+            }
+            
+            // 如果選擇無邊框，直接返回
+            if (borderType === 'none') {
+                return;
+            }
+            
+            const imgWidth = image.getScaledWidth();
+            const imgHeight = image.getScaledHeight();
+            const borderWidth = parseInt(document.getElementById('border-width').value);
+            const borderColor = document.getElementById('border-color').value;
+            
+            // 創建不同類型的邊框
+            let border;
+            
+            switch (borderType) {
+                case 'simple':
+                    border = new fabric.Rect({
+                        left: image.left - borderWidth,
+                        top: image.top - borderWidth,
+                        width: imgWidth + borderWidth * 2,
+                        height: imgHeight + borderWidth * 2,
+                        fill: 'transparent',
+                        stroke: borderColor,
+                        strokeWidth: borderWidth,
+                        selectable: false
+                    });
+                    break;
+                    
+                case 'double':
+                    // 雙線邊框使用兩個矩形
+                    const outerBorder = new fabric.Rect({
+                        left: image.left - borderWidth * 2,
+                        top: image.top - borderWidth * 2,
+                        width: imgWidth + borderWidth * 4,
+                        height: imgHeight + borderWidth * 4,
+                        fill: 'transparent',
+                        stroke: borderColor,
+                        strokeWidth: borderWidth,
+                        selectable: false
+                    });
+                    
+                    const innerBorder = new fabric.Rect({
+                        left: image.left - borderWidth / 2,
+                        top: image.top - borderWidth / 2,
+                        width: imgWidth + borderWidth,
+                        height: imgHeight + borderWidth,
+                        fill: 'transparent',
+                        stroke: borderColor,
+                        strokeWidth: borderWidth,
+                        selectable: false
+                    });
+                    
+                    // 將兩個邊框合併為一個群組
+                    border = new fabric.Group([outerBorder, innerBorder], {
+                        selectable: false
+                    });
+                    break;
+                    
+                case 'dashed':
+                    border = new fabric.Rect({
+                        left: image.left - borderWidth,
+                        top: image.top - borderWidth,
+                        width: imgWidth + borderWidth * 2,
+                        height: imgHeight + borderWidth * 2,
+                        fill: 'transparent',
+                        stroke: borderColor,
+                        strokeWidth: borderWidth,
+                        strokeDashArray: [10, 5],
+                        selectable: false
+                    });
+                    break;
+                    
+                case 'dotted':
+                    border = new fabric.Rect({
+                        left: image.left - borderWidth,
+                        top: image.top - borderWidth,
+                        width: imgWidth + borderWidth * 2,
+                        height: imgHeight + borderWidth * 2,
+                        fill: 'transparent',
+                        stroke: borderColor,
+                        strokeWidth: borderWidth,
+                        strokeDashArray: [2, 3],
+                        selectable: false
+                    });
+                    break;
+                    
+                case 'fancy1':
+                    // 彩虹漸變邊框（使用四個矩形來模擬漸變邊框）
+                    const padding = borderWidth * 1.5;
+                    
+                    // 上邊框
+                    const topBorder = new fabric.Rect({
+                        left: image.left - padding,
+                        top: image.top - padding,
+                        width: imgWidth + padding * 2,
+                        height: borderWidth,
+                        fill: 'red',
+                        selectable: false
+                    });
+                    
+                    // 右邊框
+                    const rightBorder = new fabric.Rect({
+                        left: image.left + imgWidth,
+                        top: image.top - padding,
+                        width: borderWidth,
+                        height: imgHeight + padding * 2,
+                        fill: 'blue',
+                        selectable: false
+                    });
+                    
+                    // 下邊框
+                    const bottomBorder = new fabric.Rect({
+                        left: image.left - padding,
+                        top: image.top + imgHeight,
+                        width: imgWidth + padding * 2,
+                        height: borderWidth,
+                        fill: 'green',
+                        selectable: false
+                    });
+                    
+                    // 左邊框
+                    const leftBorder = new fabric.Rect({
+                        left: image.left - padding,
+                        top: image.top - padding,
+                        width: borderWidth,
+                        height: imgHeight + padding * 2,
+                        fill: 'yellow',
+                        selectable: false
+                    });
+                    
+                    // 將四個邊框合併為一個群組
+                    border = new fabric.Group([topBorder, rightBorder, bottomBorder, leftBorder], {
+                        selectable: false
+                    });
+                    break;
+            }
+            
+            if (border) {
+                // 將邊框添加到畫布，並放在圖片後面
+                canvas.add(border);
+                canvas.sendToBack(border);
+                
+                // 保存活動邊框引用
+                activeBorder = border;
+                
+                canvas.renderAll();
+            }
+        }
+        
+        // 應用濾鏡
+        function applyFilters() {
+            if (!image) return;
+            
+            // 儲存原始圖片數據URL
+            const originalUrl = image.getSrc();
+            
+            // 創建臨時圖片元素
+            const imgEl = new Image();
+            imgEl.crossOrigin = 'Anonymous';
+            
+            // 當圖片加載完成，應用濾鏡
+            imgEl.onload = function() {
+                // 創建臨時畫布
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = imgEl.width;
+                tempCanvas.height = imgEl.height;
+                const ctx = tempCanvas.getContext('2d');
+                
+                // 繪製圖片
+                ctx.drawImage(imgEl, 0, 0);
+                
+                // 獲取圖片數據
+                const imageData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                const data = imageData.data;
+                
+                // 應用亮度
+                const brightness = 1 + filterValues.brightness / 100;
+                
+                // 應用對比度
+                const contrast = 1 + filterValues.contrast / 100;
+                
+                // 應用飽和度
+                const saturation = 1 + filterValues.saturation / 100;
+                
+                // 應用所有像素處理濾鏡
+                for (let i = 0; i < data.length; i += 4) {
+                    // 應用亮度
+                    data[i] = data[i] * brightness;
+                    data[i + 1] = data[i + 1] * brightness;
+                    data[i + 2] = data[i + 2] * brightness;
+                    
+                    // 應用對比度
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    
+                    const avg = (r + g + b) / 3;
+                    
+                    data[i] = avg + contrast * (r - avg);
+                    data[i + 1] = avg + contrast * (g - avg);
+                    data[i + 2] = avg + contrast * (b - avg);
+                    
+                    // 應用飽和度
+                    const hsv = rgbToHsv(data[i], data[i + 1], data[i + 2]);
+                    hsv[1] *= saturation;
+                    const rgb = hsvToRgb(hsv[0], hsv[1], hsv[2]);
+                    
+                    data[i] = rgb[0];
+                    data[i + 1] = rgb[1];
+                    data[i + 2] = rgb[2];
+                }
+                
+                // 更新畫布數據
+                ctx.putImageData(imageData, 0, 0);
+                
+                // 如果有模糊濾鏡，應用CSS濾鏡
+                if (filterValues.blur > 0) {
+                    // 由於Fabric.js不直接支持CSS濾鏡，這裡使用另一個畫布
+                    const blurCanvas = document.createElement('canvas');
+                    blurCanvas.width = tempCanvas.width;
+                    blurCanvas.height = tempCanvas.height;
+                    const blurCtx = blurCanvas.getContext('2d');
+                    
+                    // 應用模糊濾鏡
+                    blurCtx.filter = `blur(${filterValues.blur}px)`;
+                    blurCtx.drawImage(tempCanvas, 0, 0);
+                    
+                    // 從模糊畫布創建新圖片
+                    createNewImageFromCanvas(blurCanvas);
+                } else {
+                    // 從臨時畫布創建新圖片
+                    createNewImageFromCanvas(tempCanvas);
+                }
