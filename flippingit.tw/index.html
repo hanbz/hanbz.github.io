@@ -1,0 +1,62 @@
+// 初始化Fabric.js畫布
+const canvas = new fabric.Canvas('canvas');
+
+// 加載圖片
+fabric.Image.fromURL('path/to/image.jpg', function(img) {
+  // 調整大小
+  img.scaleToWidth(500);
+  canvas.add(img);
+  canvas.centerObject(img);
+  canvas.setActiveObject(img);
+});
+
+// 自定義邊框函數
+function addCustomBorder(borderType) {
+  const activeObj = canvas.getActiveObject();
+  if (!activeObj) return;
+  
+  // 取得選中物件尺寸
+  const width = activeObj.getScaledWidth();
+  const height = activeObj.getScaledHeight();
+  const left = activeObj.left;
+  const top = activeObj.top;
+  
+  // 建立邊框 (這裡以矩形為例，可依需求自定義)
+  let border;
+  if (borderType === 'simple') {
+    border = new fabric.Rect({
+      width: width + 20,
+      height: height + 20,
+      left: left - 10,
+      top: top - 10,
+      fill: 'transparent',
+      stroke: '#000',
+      strokeWidth: 5
+    });
+  } else if (borderType === 'fancy') {
+    // 自定義花式邊框
+    // ...其他邊框樣式
+  }
+  
+  canvas.add(border);
+  canvas.sendToBack(border);
+}
+
+// 裁剪功能
+function cropImage() {
+  const activeObj = canvas.getActiveObject();
+  // 實現裁剪邏輯
+}
+
+// 下載功能
+function downloadImage() {
+  const dataURL = canvas.toDataURL({
+    format: 'png',
+    quality: 1
+  });
+  
+  const link = document.createElement('a');
+  link.href = dataURL;
+  link.download = 'edited-image.png';
+  link.click();
+}
