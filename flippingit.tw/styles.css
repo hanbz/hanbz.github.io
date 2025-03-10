@@ -311,6 +311,23 @@ input[type="range"]::-webkit-slider-thumb {
     gap: 1rem;
 }
 
+.steps-guide {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.step {
+    padding: 5px 10px;
+    background-color: var(--paper-color);
+    border-radius: 15px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+}
+
 @media (max-width: 900px) {
     .container {
         padding: 10px;
