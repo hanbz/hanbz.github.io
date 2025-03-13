@@ -346,7 +346,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .banner {
-    background: url('assets/pic/網站_BN 1920x960px.png');
+    background: url('assets/pic/網站_BN\ 1920x960px.webp');
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
