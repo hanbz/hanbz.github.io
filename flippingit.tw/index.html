@@ -1,99 +1,94 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>照片相框應用</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@200;300;400;900&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <header class="header">
-        <div class="header-left">
-            <div class="logo-container">
-                <img src="https://flippingit.tw/wp-content/uploads/2021/07/logo-%E6%A9%AB%E5%BC%8F-300x66.png.webp" alt="Flipping IT Logo" class="logo">
-            </div>
-            <h2 class="header-title">影像藝術框優化系統</h2>
-        </div>
-        <div class="header-right">
-            <div class="social-icons">
-                <a href="#" class="social-icon" title="Facebook">
-                    <i class="fab fa-facebook"></i>
-                </a>
-                <a href="#" class="social-icon" title="Instagram">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </div>
-        </div>
-    </header>
-
     <div class="banner">
-        <div class="banner-content">
-            <h1>創造獨特的相框藝術(banner區塊，可放廣告)</h1>
-            <p>為您的照片增添專業品味，展現獨特風格</p>
+    </div>
+
+    <div class="process-section">
+        <div class="text-title">流程說明</div>
+        <img src="assets/pic/網站_分隔蠟筆線條.png" alt="" class="line">
+        <div class="process-text-container">
+            <span class="process-number">1</span><span class="process-text">選擇照片</span>
+            <span class="process-number">2</span><span class="process-text">選擇相框</span>
+            <span class="process-number">3</span><span class="process-text">調整照片</span>
+            <span class="process-number">4</span><span class="process-text">下載成品&提交照片</span>
         </div>
     </div>
 
-    <div class="container">
-        <div class="app-container">
-            <div class="upload-section">
-                <button class="upload-btn" id="upload-btn">上傳圖片</button>
-                <input type="file" id="file-input" class="file-input" accept="image/*">
-                <div class="steps-guide">
-                    <div class="step">1. 選取圖片</div>
-                    <div class="step">2. 選擇外框</div>
-                    <div class="step">3. 視需要調整參數</div>
-                    <div class="step">4. 下載成品</div>
-                </div>
-            </div>
-        
-        <div class="canvas-container">
-            <canvas id="canvas" width="800" height="600"></canvas>
-                <div class="no-image-message" id="no-image-message">請上傳一張圖片開始編輯</div>
-            <div class="loading" id="loading">
-                <div class="loading-spinner"></div>
-            </div>
-        </div>
-        
-            <div class="controls">
-                <div class="frames-section">
-                    <h3 class="section-title">選擇相框</h3>
-                    <div class="frames-container" id="frames-container">
-                        <div class="frame-option" id="no-frame" data-frame="none">
-                            <span>無框</span>
-                        </div>
-                        <!-- 相框選項將由JavaScript動態載入 -->
-                    </div>
-                    <div class="slider-container frame-size-control" style="display: none;">
-                        <label for="frame-size">相框大小: <span id="frame-size-value">20</span>px</label>
-                        <input type="range" id="frame-size" min="-50" max="50" value="0">
-                    </div>
-                </div>
-                
-                <div class="adjustments-section">
-                    <h3 class="section-title">調整參數</h3>
-                        <div class="slider-container">
-                            <label for="brightness">亮度: <span id="brightness-value">0</span></label>
-                            <input type="range" id="brightness" min="-100" max="100" value="0">
-                        </div>
-                        <div class="slider-container">
-                            <label for="contrast">對比度: <span id="contrast-value">0</span></label>
-                            <input type="range" id="contrast" min="-100" max="100" value="0">
-                        </div>
-                        <div class="slider-container">
-                            <label for="saturation">飽和度: <span id="saturation-value">0</span></label>
-                            <input type="range" id="saturation" min="-100" max="100" value="0">
-                        </div>
-                    <button class="download-btn" id="apply-filters">套用調整</button>
-                    <button class="download-btn" id="reset-filters" style="background-color: #f44336;">重置調整</button>
-                </div>
-            </div>
-            
-            <div class="download-section">
-                <button class="download-btn" id="download-btn">下載圖片</button>
-            </div>
+    <div class="upload-section">
+        <label for="file-input" class="upload-btn-container">
+            <img src="assets/pic/網站_上傳照片按鈕.png" alt="上傳圖片" class="upload-img-btn">
+        </label>
+        <input type="file" id="file-input" class="file-input" accept="image/*">
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="canvas" width="750" height="1111"></canvas>
+        <div class="no-image-message" id="no-image-message">請上傳一張圖片開始編輯</div>
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
         </div>
     </div>
+
+
+    <div class="frames-section">
+        <div class="text-title">選擇相框</div>
+        <div class="frames-container" id="frames-container">
+            <button class="frame-btn" data-frame="./assets/frames/網站_相框01.png">
+                <img src="assets/pic/網站_相框1按鈕.png" alt="相框1" class="frame-img-btn">
+            </button>
+            <button class="frame-btn" data-frame="./assets/frames/網站_相框02.png">
+                <img src="assets/pic/網站_相框2按鈕.png" alt="相框2" class="frame-img-btn">
+            </button>
+        </div>
+    </div>
+
+    <img src="assets/pic/網站_分隔蠟筆線條.png" alt="" class="line">
+    <div class="adjustments-section">
+        <div class="text-title">調整照片</div>
+        <div class="slider-wrapper">
+            <div class="slider-container">
+                <label for="brightness">亮度: <span id="brightness-value">0</span></label>
+                <input type="range" id="brightness" min="-100" max="100" value="0">
+            </div>
+            <div class="slider-container">
+                <label for="contrast">對比度: <span id="contrast-value">0</span></label>
+                <input type="range" id="contrast" min="-100" max="100" value="0">
+            </div>
+            <div class="slider-container">
+                <label for="saturation">飽和度: <span id="saturation-value">0</span></label>
+                <input type="range" id="saturation" min="-100" max="100" value="0">
+            </div>
+        </div>
+        <div class="button-container">
+            <button class="download-btn" id="apply-filters">
+                <img src="assets/pic/網站_套用調整按鈕.png" alt="套用調整" class="filter-img-btn">
+            </button>
+            <button class="download-btn" id="reset-filters">
+                <img src="assets/pic/網站_重置調整按鈕.png" alt="重置調整" class="filter-img-btn">
+            </button>
+        </div>
+    </div>
+
+
+    <div class="download-section">
+        <button class="download-btn" id="download-btn">
+            <img src="assets/pic/網站_下載成品按鈕.png" alt="下載圖片" class="download-img-btn">
+        </button>
+    </div>
+
 
     <script>
         // 初始化變數
@@ -106,145 +101,125 @@
             contrast: 0,
             saturation: 0
         };
-        let framePadding = 20;
-        let frames = []; // 儲存所有相框資訊
-        
+
         // 初始化
-        window.onload = function() {
+        window.onload = function () {
             canvas = document.getElementById('canvas');
             ctx = canvas.getContext('2d');
-            
+
             // 設置畫布大小
             resizeCanvas();
-            
+
             // 監聽視窗大小變化
             window.addEventListener('resize', resizeCanvas);
-            
-            // 載入相框
-            loadFrames();
-            
+
+            // 初始化事件
             initEvents();
         };
-        
+
         // 初始化事件監聽
         function initEvents() {
-            // 上傳圖片
-            document.getElementById('upload-btn').addEventListener('click', function() {
-                document.getElementById('file-input').click();
-            });
-            
-            document.getElementById('file-input').addEventListener('change', function(e) {
+            // 上傳圖片 - 不再需要點擊按鈕事件，因為我們使用label直接觸發file input
+            document.getElementById('file-input').addEventListener('change', function (e) {
                 if (this.files && this.files[0]) {
                     uploadImage(this.files[0]);
                 }
             });
-            
+
             // 相框選擇
-            document.querySelectorAll('.frame-option').forEach(option => {
-                option.addEventListener('click', function() {
+            document.querySelectorAll('.frame-btn').forEach(button => {
+                button.addEventListener('click', function () {
                     if (!currentImage) {
                         alert('請先上傳一張圖片');
                         return;
                     }
-                    
+
                     // 移除之前的選中狀態
-                    document.querySelectorAll('.frame-option').forEach(opt => {
-                        opt.classList.remove('selected');
+                    document.querySelectorAll('.frame-btn').forEach(btn => {
+                        btn.classList.remove('selected');
                     });
-                    
+
                     // 添加新選中狀態
                     this.classList.add('selected');
-                    
-                    // 顯示相框大小控制
-                    document.querySelector('.frame-size-control').style.display = 'block';
-                    
+
                     // 應用相框
                     applyFrame(this.getAttribute('data-frame'));
                 });
             });
-            
+
             // 調整參數滑塊
-            document.getElementById('brightness').addEventListener('input', function() {
+            document.getElementById('brightness').addEventListener('input', function () {
                 document.getElementById('brightness-value').textContent = this.value;
                 filterValues.brightness = parseInt(this.value);
             });
-            
-            document.getElementById('contrast').addEventListener('input', function() {
+
+            document.getElementById('contrast').addEventListener('input', function () {
                 document.getElementById('contrast-value').textContent = this.value;
                 filterValues.contrast = parseInt(this.value);
             });
-            
-            document.getElementById('saturation').addEventListener('input', function() {
+
+            document.getElementById('saturation').addEventListener('input', function () {
                 document.getElementById('saturation-value').textContent = this.value;
                 filterValues.saturation = parseInt(this.value);
             });
-            
-            // 相框大小調整
-            document.getElementById('frame-size').addEventListener('input', function() {
-                if (!frameImage) return;
-                
-                framePadding = parseInt(this.value);
-                document.getElementById('frame-size-value').textContent = framePadding;
-                redrawCanvas();
-            });
-            
+
             // 套用濾鏡
             document.getElementById('apply-filters').addEventListener('click', applyFilters);
-            
+
             // 重置濾鏡
             document.getElementById('reset-filters').addEventListener('click', resetFilters);
-            
+
             // 下載圖片
             document.getElementById('download-btn').addEventListener('click', downloadImage);
         }
-        
+
         // 添加畫布大小調整函數
         function resizeCanvas() {
             const container = document.querySelector('.canvas-container');
             const containerWidth = container.clientWidth;
             const containerHeight = container.clientHeight;
-            
+
             canvas.width = containerWidth;
             canvas.height = containerHeight;
-            
+
             // 重新設置背景
-            ctx.fillStyle = '#f0f0f0';
+            ctx.fillStyle = '#0064b4';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             // 如果有圖片，重新繪製
             if (currentImage) {
                 redrawCanvas();
             }
         }
-        
+
         // 上傳圖片
         function uploadImage(file) {
             document.getElementById('loading').style.display = 'flex';
             document.getElementById('no-image-message').style.display = 'none';
-            
+
             const reader = new FileReader();
-            
-            reader.onload = function(event) {
+
+            reader.onload = function (event) {
                 const img = new Image();
-                img.onload = function() {
+                img.onload = function () {
                     // 清除畫布
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.fillStyle = '#f0f0f0';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
+
                     // 計算縮放比例
                     const scale = Math.min(
                         (canvas.width * 0.9) / img.width,
                         (canvas.height * 0.9) / img.height
                     );
-                    
+
                     // 計算居中位置
                     const x = (canvas.width - img.width * scale) / 2;
                     const y = (canvas.height - img.height * scale) / 2;
-                    
+
                     // 繪製圖片
                     ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-                    
+
                     // 保存原始圖片和當前圖片
                     originalImage = {
                         element: img,
@@ -253,153 +228,91 @@
                         width: img.width * scale,
                         height: img.height * scale
                     };
-                    
-                    currentImage = {...originalImage};
-                    
+
+                    currentImage = { ...originalImage };
+
                     // 如果有相框，重新應用
                     if (frameImage) {
                         drawFrame();
                     }
-                    
+
                     document.getElementById('loading').style.display = 'none';
-                    
-                    // 重置相框選擇
-                    document.querySelectorAll('.frame-option').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
-                    document.getElementById('no-frame').classList.add('selected');
-                    
+
                     // 重置濾鏡
                     resetFilters();
                 };
-                
+
                 img.src = event.target.result;
             };
-            
-            reader.onerror = function(error) {
+
+            reader.onerror = function (error) {
                 console.log("Error loading file: ", error);
                 document.getElementById('loading').style.display = 'none';
                 alert('載入圖片時發生錯誤');
             };
-            
+
             reader.readAsDataURL(file);
         }
-        
-        // 載入相框
-        async function loadFrames() {
-            try {
-                const framesContainer = document.getElementById('frames-container');
-                
-                // 預設的相框列表
-                const frameFiles = [
-                    'Vertical Film Frame 01.png',
-                    'Vertical Film Frame 02.png',
-                    'Vertical Film Frame 03.png',
-                    'Vertical Film Frame 04.png',
-                    'Vertical Film Frame 05.png'
-                ];
-                
-                // 為每個相框創建選項
-                frameFiles.forEach(fileName => {
-                    const framePath = `frames/${fileName}`;
-                    
-                    frames.push({
-                        path: framePath,
-                        name: fileName
-                    });
-                    
-                    // 創建相框選項
-                    const frameOption = document.createElement('div');
-                    frameOption.className = 'frame-option';
-                    frameOption.setAttribute('data-frame', framePath);
-                    frameOption.style.backgroundImage = `url('${framePath}')`;
-                    
-                    // 添加點擊事件
-                    frameOption.addEventListener('click', function() {
-                        if (!currentImage) {
-                            alert('請先上傳一張圖片');
-                            return;
-                        }
-                        
-                        // 移除之前的選中狀態
-                        document.querySelectorAll('.frame-option').forEach(opt => {
-                            opt.classList.remove('selected');
-                        });
-                        
-                        // 添加新選中狀態
-                        this.classList.add('selected');
-                        
-                        // 顯示相框大小控制
-                        document.querySelector('.frame-size-control').style.display = 'block';
-                        
-                        // 應用相框
-                        applyFrame(this.getAttribute('data-frame'));
-                    });
-                    
-                    framesContainer.appendChild(frameOption);
-                });
-            } catch (error) {
-                console.error('載入相框失敗:', error);
-            }
-        }
-        
+
         // 修改應用相框函數
         function applyFrame(frameType) {
             if (!currentImage) return;
-            
+
             document.getElementById('loading').style.display = 'flex';
-            
-            // 如果選擇無框
-            if (frameType === 'none') {
-                frameImage = null;
-                redrawCanvas();
-                document.getElementById('loading').style.display = 'none';
-                return;
-            }
-            
+
             // 載入相框圖片
             const frame = new Image();
-            frame.onload = function() {
+            frame.onload = function () {
                 frameImage = {
-                    element: frame
+                    element: frame,
+                    path: frameType
                 };
-                
+
                 redrawCanvas();
                 document.getElementById('loading').style.display = 'none';
+
+                // 更新選中狀態
+                document.querySelectorAll('.frame-btn').forEach(btn => {
+                    if (btn.getAttribute('data-frame') === frameType) {
+                        btn.classList.add('selected');
+                    } else {
+                        btn.classList.remove('selected');
+                    }
+                });
             };
-            
-            frame.onerror = function(error) {
+
+            frame.onerror = function (error) {
                 console.error('載入相框圖片失敗:', error);
                 alert('無法載入相框圖片');
                 document.getElementById('loading').style.display = 'none';
             };
-            
+
             frame.src = frameType;
         }
-        
+
         // 繪製相框
         function drawFrame() {
             if (!frameImage || !currentImage) return;
-            
-            const frameWidth = currentImage.width + framePadding * 2;
-            const frameHeight = currentImage.height + framePadding * 2;
-            
+
+            const frameWidth = currentImage.width;
+            const frameHeight = currentImage.height;
+
             ctx.drawImage(
                 frameImage.element,
-                currentImage.x - framePadding,
-                currentImage.y - framePadding,
+                currentImage.x,
+                currentImage.y,
                 frameWidth,
                 frameHeight
             );
         }
-        
+
         // 重繪畫布
         function redrawCanvas() {
             // 清除畫布
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#f0f0f0';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             // 繪製當前圖片
             if (currentImage) {
                 ctx.drawImage(
@@ -409,78 +322,78 @@
                     currentImage.width,
                     currentImage.height
                 );
-                
+
                 // 繪製相框（如果有）
                 if (frameImage) {
                     drawFrame();
                 }
             }
         }
-        
+
         // 應用濾鏡
         function applyFilters() {
             if (!currentImage) {
                 alert('請先上傳一張圖片');
                 return;
             }
-            
+
             document.getElementById('loading').style.display = 'flex';
-            
-                // 創建臨時畫布
-                const tempCanvas = document.createElement('canvas');
+
+            // 創建臨時畫布
+            const tempCanvas = document.createElement('canvas');
             tempCanvas.width = currentImage.width;
             tempCanvas.height = currentImage.height;
             const tempCtx = tempCanvas.getContext('2d');
-            
+
             // 繪製當前圖片到臨時畫布
             tempCtx.drawImage(currentImage.element, 0, 0, currentImage.width, currentImage.height);
-                
-                // 獲取圖片數據
+
+            // 獲取圖片數據
             const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-                const data = imageData.data;
-                
+            const data = imageData.data;
+
             // 應用濾鏡
-                const brightnessValue = 1 + filterValues.brightness / 100;
-                const contrastValue = 1 + filterValues.contrast / 100;
-                const saturationValue = 1 + filterValues.saturation / 100;
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    // 應用亮度
-                    data[i] = data[i] * brightnessValue;
-                    data[i + 1] = data[i + 1] * brightnessValue;
-                    data[i + 2] = data[i + 2] * brightnessValue;
-                    
-                    // 應用對比度
-                    data[i] = ((data[i] - 128) * contrastValue) + 128;
-                    data[i + 1] = ((data[i + 1] - 128) * contrastValue) + 128;
-                    data[i + 2] = ((data[i + 2] - 128) * contrastValue) + 128;
-                    
+            const brightnessValue = 1 + filterValues.brightness / 100;
+            const contrastValue = 1 + filterValues.contrast / 100;
+            const saturationValue = 1 + filterValues.saturation / 100;
+
+            for (let i = 0; i < data.length; i += 4) {
+                // 應用亮度
+                data[i] = data[i] * brightnessValue;
+                data[i + 1] = data[i + 1] * brightnessValue;
+                data[i + 2] = data[i + 2] * brightnessValue;
+
+                // 應用對比度
+                data[i] = ((data[i] - 128) * contrastValue) + 128;
+                data[i + 1] = ((data[i + 1] - 128) * contrastValue) + 128;
+                data[i + 2] = ((data[i + 2] - 128) * contrastValue) + 128;
+
                 // 應用飽和度
-                    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                    data[i] = avg + saturationValue * (data[i] - avg);
-                    data[i + 1] = avg + saturationValue * (data[i + 1] - avg);
-                    data[i + 2] = avg + saturationValue * (data[i + 2] - avg);
-                    
-                    // 確保顏色值在有效範圍內
-                    data[i] = Math.max(0, Math.min(255, data[i]));
-                    data[i + 1] = Math.max(0, Math.min(255, data[i + 1]));
-                    data[i + 2] = Math.max(0, Math.min(255, data[i + 2]));
-                }
-                
+                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                data[i] = avg + saturationValue * (data[i] - avg);
+                data[i + 1] = avg + saturationValue * (data[i + 1] - avg);
+                data[i + 2] = avg + saturationValue * (data[i + 2] - avg);
+
+                // 確保顏色值在有效範圍內
+                data[i] = Math.max(0, Math.min(255, data[i]));
+                data[i + 1] = Math.max(0, Math.min(255, data[i + 1]));
+                data[i + 2] = Math.max(0, Math.min(255, data[i + 2]));
+            }
+
             // 更新臨時畫布
             tempCtx.putImageData(imageData, 0, 0);
-            
+
             // 創建新圖片
             const newImg = new Image();
-            newImg.onload = function() {
+            newImg.onload = function () {
                 currentImage.element = newImg;
                 redrawCanvas();
                 document.getElementById('loading').style.display = 'none';
             };
-            
+
             newImg.src = tempCanvas.toDataURL();
         }
-        
+
         // 重置濾鏡
         function resetFilters() {
             filterValues = {
@@ -488,30 +401,30 @@
                 contrast: 0,
                 saturation: 0
             };
-            
+
             // 重置滑塊
             document.getElementById('brightness').value = 0;
             document.getElementById('contrast').value = 0;
             document.getElementById('saturation').value = 0;
-            
+
             // 更新顯示值
             document.getElementById('brightness-value').textContent = '0';
             document.getElementById('contrast-value').textContent = '0';
             document.getElementById('saturation-value').textContent = '0';
-            
+
             if (originalImage) {
-                currentImage = {...originalImage};
+                currentImage = { ...originalImage };
                 redrawCanvas();
             }
         }
-        
+
         // 下載圖片
         function downloadImage() {
             if (!currentImage) {
                 alert('請先上傳一張圖片');
                 return;
             }
-            
+
             const link = document.createElement('a');
             link.href = canvas.toDataURL('image/png');
             link.download = 'framed_photo.png';
@@ -519,4 +432,5 @@
         }
     </script>
 </body>
-</html> 
+
+</html>
