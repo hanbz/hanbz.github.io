@@ -46,7 +46,7 @@
     <div class="frames-section">
         <div class="text-title">選擇相框</div>
         <div class="frames-container" id="frames-container">
-            <button class="frame-btn" data-frame="./assets/frames/網站_相框01.webp">
+            <button class="frame-btn selected" data-frame="./assets/frames/網站_相框01.webp">
                 <img src="assets/pic/網站_相框1按鈕.png" alt="相框1" class="frame-img-btn">
             </button>
             <button class="frame-btn" data-frame="./assets/frames/網站_相框02.webp">
@@ -115,6 +115,9 @@
 
             // 初始化事件
             initEvents();
+
+            // 自動選擇相框01 - 直接指定相框路徑，不依賴DOM選擇器
+            applyFrame('./assets/frames/網站_相框01.webp');
         };
 
         // 初始化事件監聽
@@ -129,11 +132,6 @@
             // 相框選擇
             document.querySelectorAll('.frame-btn').forEach(button => {
                 button.addEventListener('click', function () {
-                    if (!currentImage) {
-                        alert('請先上傳一張圖片');
-                        return;
-                    }
-
                     // 移除之前的選中狀態
                     document.querySelectorAll('.frame-btn').forEach(btn => {
                         btn.classList.remove('selected');
@@ -186,10 +184,8 @@
             ctx.fillStyle = '#0064b4';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 如果有圖片，重新繪製
-            if (currentImage) {
-                redrawCanvas();
-            }
+            // 重新繪製
+            redrawCanvas();
         }
 
         // 上傳圖片
@@ -256,8 +252,6 @@
 
         // 修改應用相框函數
         function applyFrame(frameType) {
-            if (!currentImage) return;
-
             document.getElementById('loading').style.display = 'flex';
 
             // 載入相框圖片
@@ -268,6 +262,7 @@
                     path: frameType
                 };
 
+                // 即使沒有圖片也需要重繪畫布以顯示相框
                 redrawCanvas();
                 document.getElementById('loading').style.display = 'none';
 
@@ -292,28 +287,54 @@
 
         // 繪製相框
         function drawFrame() {
-            if (!frameImage || !currentImage) return;
+            if (!frameImage) return;
+            
+            if (currentImage) {
+                // 如果有图片，将相框绘制在图片上
+                const frameWidth = currentImage.width;
+                const frameHeight = currentImage.height;
 
-            const frameWidth = currentImage.width;
-            const frameHeight = currentImage.height;
+                ctx.drawImage(
+                    frameImage.element,
+                    currentImage.x,
+                    currentImage.y,
+                    frameWidth,
+                    frameHeight
+                );
+            } else {
+                // 如果没有图片，将相框居中显示在画布上，使用适合的大小
+                // 在小屏幕设备上使用更小的比例
+                let scale = 0.8;
+                if (window.innerWidth <= 480) {
+                    scale = 0.7;
+                }
+                if (window.innerWidth <= 360) {
+                    scale = 0.6;
+                }
+                
+                const frameWidth = canvas.width * scale;
+                const frameHeight = canvas.height * scale;
+                const frameX = (canvas.width - frameWidth) / 2;
+                const frameY = (canvas.height - frameHeight) / 2;
 
-            ctx.drawImage(
-                frameImage.element,
-                currentImage.x,
-                currentImage.y,
-                frameWidth,
-                frameHeight
-            );
+                ctx.drawImage(
+                    frameImage.element,
+                    frameX,
+                    frameY,
+                    frameWidth,
+                    frameHeight
+                );
+            }
         }
 
         // 重繪畫布
         function redrawCanvas() {
             // 清除畫布
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#f0f0f0';
+            ctx.fillStyle = '#0064b4';  // 使用背景藍色
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 繪製當前圖片
+            // 繪製當前圖片（如果有）
             if (currentImage) {
                 ctx.drawImage(
                     currentImage.element,
@@ -322,11 +343,18 @@
                     currentImage.width,
                     currentImage.height
                 );
+            }
 
-                // 繪製相框（如果有）
-                if (frameImage) {
-                    drawFrame();
-                }
+            // 繪製相框（無論是否有圖片）
+            if (frameImage) {
+                drawFrame();
+            }
+            
+            // 如果沒有圖片，顯示提示訊息（除非已經顯示了相框）
+            if (!currentImage && !frameImage) {
+                document.getElementById('no-image-message').style.display = 'block';
+            } else {
+                document.getElementById('no-image-message').style.display = 'none';
             }
         }
 
