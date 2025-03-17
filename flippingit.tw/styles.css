@@ -333,6 +333,10 @@ input[type="range"]::-webkit-slider-thumb {
     font-weight: 500;
 }
 
+.download-section .download-img-btn {
+    max-width: 250px;
+}
+
 .loading {
     position: absolute;
     top: 0;
@@ -763,6 +767,10 @@ input[type="range"]::-webkit-slider-thumb {
     
     .upload-img-btn, .download-img-btn, .filter-img-btn {
         max-width: 100px;
+    }
+    
+    .download-section .download-img-btn {
+        max-width: 180px;
     }
     
     .slider-wrapper {
