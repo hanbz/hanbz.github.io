@@ -13,6 +13,23 @@
 </head>
 
 <body>
+    <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true" focusable="false">
+        <defs>
+            <filter id="text-stroke">
+                <feMorphology in="SourceAlpha" result="expanded" operator="dilate" radius="2.5"></feMorphology>
+                <feFlood flood-color="#002368" result="stroke-color"></feFlood>
+                <feComposite in="stroke-color" in2="expanded" operator="in" result="stroke-colored"></feComposite>
+                <feComposite in="SourceGraphic" in2="stroke-colored" operator="over"></feComposite>
+            </filter>
+            <filter id="title-stroke">
+                <feMorphology in="SourceAlpha" result="expanded" operator="dilate" radius="2.5"></feMorphology>
+                <feFlood flood-color="#002368" result="stroke-color"></feFlood>
+                <feComposite in="stroke-color" in2="expanded" operator="in" result="stroke-colored"></feComposite>
+                <feComposite in="SourceGraphic" in2="stroke-colored" operator="over"></feComposite>
+            </filter>
+        </defs>
+    </svg>
+
     <div class="banner">
     </div>
 
@@ -20,10 +37,22 @@
         <div class="text-title">流程說明</div>
         <img src="assets/pic/網站_分隔蠟筆線條.png" alt="" class="line">
         <div class="process-text-container">
-            <span class="process-number">1</span><span class="process-text">選擇照片</span>
-            <span class="process-number">2</span><span class="process-text">選擇相框</span>
-            <span class="process-number">3</span><span class="process-text">調整照片</span>
-            <span class="process-number">4</span><span class="process-text">下載成品&提交照片</span>
+            <div class="process-item">
+                <span class="process-number" data-number="1"></span>
+                <span class="process-text">選擇照片</span>
+            </div>
+            <div class="process-item">
+                <span class="process-number" data-number="2"></span>
+                <span class="process-text">選擇相框</span>
+            </div>
+            <div class="process-item">
+                <span class="process-number" data-number="3"></span>
+                <span class="process-text">調整照片</span>
+            </div>
+            <div class="process-item">
+                <span class="process-number" data-number="4"></span>
+                <span class="process-text">下載成品&提交照片</span>
+            </div>
         </div>
     </div>
 
