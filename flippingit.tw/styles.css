@@ -145,10 +145,12 @@ h1 {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     background-color: #fff;
     position: relative;
-    width: 750px;
-    height: 1111px;
-    max-width: 100%;
-    aspect-ratio: 750/1111;
+    width: 60%;
+    max-width: 750px;
+    aspect-ratio: 2/3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #canvas {
@@ -158,7 +160,7 @@ h1 {
     width: 100%;
     height: 100%;
     border: 1px solid white;
-    background-color: #0064b4;
+    background-color: white;
 }
 
 .controls {
@@ -173,11 +175,12 @@ h1 {
     align-items: center;
     justify-content: center;
     flex-wrap: nowrap;
-    gap: 20px;
-    padding: 70px 0px;
+    gap: 5px;
+    padding: 10px 0px;
     background-color: var(--bg-color);
     border-radius: 5px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
 }
 
 .adjustments-section {
@@ -280,7 +283,7 @@ input[type="range"]::-webkit-slider-thumb {
     border-radius: 5px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
     padding: 15px;
-    margin: 50px 0px;
+    margin: 13px 0px;
     width: 600px;
     max-width: 100%;
     margin-left: auto;
@@ -289,7 +292,14 @@ input[type="range"]::-webkit-slider-thumb {
 
 .download-section {
     text-align: center;
-    margin-top: 20px;
+    margin: 20px 0;
+}
+
+.download-section .button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
 }
 
 .download-btn {
@@ -471,6 +481,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 .line {
     width: 100%;
+    display: block;
 }
 
 @media (max-width: 900px) {
@@ -482,18 +493,18 @@ input[type="range"]::-webkit-slider-thumb {
     .frames-section {
         flex-direction: column;
         align-items: center;
-        padding: 30px 0;
+        padding: 8px 0;
     }
 
     .frames-section .text-title {
         margin-right: 0;
-        margin-bottom: 15px;
+        margin-bottom: 0px;
     }
 
     .canvas-container {
-        width: 100%;
-        height: auto;
-        max-height: 70vh;
+        width: 80%;
+        max-width: 500px;
+        aspect-ratio: 2/3;
     }
 
     .controls {
@@ -557,7 +568,6 @@ input[type="range"]::-webkit-slider-thumb {
     }
 
     .download-btn {
-        width: 100%;
         margin: 5px 0;
     }
 
@@ -589,12 +599,18 @@ input[type="range"]::-webkit-slider-thumb {
     }
 
     .canvas-container {
-        max-height: 60vh;
+        width: 90%;
+        max-width: 350px;
+        aspect-ratio: 2/3;
+        max-height: none;
         border: none;
     }
     
     .frame-img-btn {
-        max-width: 100px;
+        width: 71px;
+        height: 24px;
+        margin: 0;
+        object-fit: contain;
     }
     
     .upload-img-btn {
@@ -602,12 +618,32 @@ input[type="range"]::-webkit-slider-thumb {
         margin: 20px auto;
     }
     
-    .frame-btn {
-        margin: 0 3px;
+    .frames-section {
+        padding: 10px 0;
+        margin-bottom: 0px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: nowrap;
     }
     
-    .frames-section {
-        padding: 20px 0;
+    .frames-section .text-title {
+        margin-right: 10px;
+        margin-bottom: 0;
+        white-space: nowrap;
+        font-size: 1.5em;
+    }
+    
+    .frames-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 5px;
+    }
+    
+    .frame-btn {
+        margin: 0;
+        padding: 0;
     }
     
     .text-title {
@@ -661,27 +697,68 @@ input[type="range"]::-webkit-slider-thumb {
 
     .slider-wrapper {
         padding: 1px 15px;
-        margin: 40px 25px;
+        margin: 13px 15px;
         max-width: none;
         width: auto;
+    }
+
+    .button-container,
+    .download-section .button-container {
+        gap: 10px;
+        padding: 0;
+        margin: 0;
+    }
+
+    .download-section {
+        margin: 0;
+    }
+
+    .frame-btn {
+        margin: 0 2px;
     }
 }
 
 @media (max-width: 360px) {
     .frame-img-btn {
-        max-width: 80px;
+        width: 71px;
+        height: 24px;
+        margin: 0;
+        object-fit: contain;
     }
     
     .frames-section {
-        padding: 15px 0;
+        padding: 3px 0;
+        margin-bottom: 3px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: nowrap;
     }
     
-    .text-title {
-        font-size: 1.3em;
+    .frames-section .text-title {
+        margin-right: 5px;
+        margin-bottom: 0;
+        font-size: 1.2em;
+        white-space: nowrap;
+    }
+    
+    .frames-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 2px;
+    }
+    
+    .frame-btn {
+        margin: 0;
+        padding: 0;
     }
     
     .canvas-container {
-        max-height: 50vh;
+        width: 95%;
+        max-width: 280px;
+        aspect-ratio: 2/3;
+        max-height: none;
     }
     
     .upload-img-btn, .download-img-btn, .filter-img-btn {
@@ -690,7 +767,7 @@ input[type="range"]::-webkit-slider-thumb {
     
     .slider-wrapper {
         padding: 1px 10px;
-        margin: 30px 15px;
+        margin: 13px 15px;
     }
     
     .process-text {
@@ -739,6 +816,17 @@ input[type="range"]::-webkit-slider-thumb {
         flex-direction: row;
         justify-content: flex-start;
     }
+
+    .button-container,
+    .download-section .button-container {
+        gap: 10px;
+        padding: 0;
+        margin: 0;
+    }
+
+    .frame-btn {
+        margin: 0 1px;
+    }
 }
 
 .frame-btn {
@@ -749,7 +837,6 @@ input[type="range"]::-webkit-slider-thumb {
     display: inline-block;
     text-align: center;
     transition: all 0.3s ease;
-    margin: 0 10px;
 }
 
 .frame-img-btn {
@@ -772,5 +859,64 @@ input[type="range"]::-webkit-slider-thumb {
 @media (max-width: 768px) {
     .text-title {
         font-size: 2em;
+    }
+}
+
+.popup-ad {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    position: relative;
+    display: inline-block;
+    max-width: 90%;
+    max-height: 90vh;
+}
+
+.popup-ad img {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 10px;
+    display: block;
+    object-fit: contain;
+}
+
+.popup-ad .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    font-size: 36px;
+    cursor: pointer;
+    z-index: 1001;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* 桌面版本的特殊規則 */
+@media (min-width: 1024px) {
+    .popup-content {
+        max-width: 70%;
+        max-height: 80vh;
+    }
+    
+    .popup-ad img {
+        max-width: 100%;
+        max-height: 80vh;
     }
 }
