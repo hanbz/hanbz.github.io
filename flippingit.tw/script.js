@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // 默認選擇相框1
-    applyFrame('./assets/frames/網站_相框01.webp');
+    applyFrame('./assets/frames/網站_相框01.png');
 
     // 添加畫布大小調整函數
     function resizeCanvas() {
