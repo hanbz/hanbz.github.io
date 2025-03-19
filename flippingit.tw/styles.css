@@ -176,7 +176,7 @@ h1 {
     justify-content: center;
     flex-wrap: nowrap;
     gap: 5px;
-    padding: 10px 0px;
+    padding: 18px 0px;
     background-color: var(--bg-color);
     border-radius: 5px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);

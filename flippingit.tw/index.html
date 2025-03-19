@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@200;300;400;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@200;300;400;900&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
@@ -52,8 +53,9 @@
     </div>
 
 
-    <div class="frames-section">
-        <div class="text-title">選擇相框</div>
+    <div class="frames-section" style="height: 50px;">
+        <img src="assets/pic/選擇相框.svg" alt="選擇相框" class="text-title-img"
+            style="height: 100%; width: auto; max-height: 50px;margin-right: 9px;">
         <div class="frames-container" id="frames-container">
             <button class="frame-btn selected" data-frame="./assets/frames/網站_相框01.webp">
                 <img src="assets/pic/網站_相框1按鈕.png" alt="相框1" class="frame-img-btn">
@@ -111,6 +113,14 @@
     </div>
 
     <script src="script.js"></script>
+
+    <style>
+        @media (max-width: 480px) {
+            .frames-section {
+                height: 26px !important;
+            }
+        }
+    </style>
 </body>
 
 </html>
