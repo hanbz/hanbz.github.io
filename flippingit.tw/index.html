@@ -68,7 +68,8 @@
 
     <img src="assets/pic/網站_分隔蠟筆線條 2.svg" alt="" class="line">
     <div class="adjustments-section">
-        <div class="text-title">調整照片</div>
+        <img src="assets/pic/調整照片.svg" alt="調整照片"
+            style="height: 50px; width: auto; max-height: 50px; display: block; margin: 10px auto 25px auto;">
         <div class="slider-wrapper">
             <div class="slider-container">
                 <label for="brightness">亮度: <span id="brightness-value">0</span></label>
@@ -118,6 +119,11 @@
         @media (max-width: 480px) {
             .frames-section {
                 height: 26px !important;
+            }
+            
+            img[alt="調整照片"] {
+                height: 26px !important;
+                max-height: 26px !important;
             }
         }
     </style>
