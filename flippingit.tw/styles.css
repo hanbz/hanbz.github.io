@@ -280,7 +280,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 .slider-wrapper {
     background-color: #ffffff;
-    border-radius: 5px;
+    border-radius: 15px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
     padding: 15px;
     margin: 13px 0px;
