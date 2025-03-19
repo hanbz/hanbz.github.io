@@ -2,11 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // 初始化
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    
-    // 啟用高解析度畫布
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    
     let originalImage = null;
     let currentImage = null;
     let frameImage = null;
@@ -30,12 +25,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('resize', resizeCanvas);
 
     // 初始化白色背景
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const displayWidth = canvas.width / devicePixelRatio;
-    const displayHeight = canvas.height / devicePixelRatio;
-    
     ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, displayWidth, displayHeight);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // 默認選擇相框1
     applyFrame('./assets/frames/網站_相框01.png');
@@ -48,30 +39,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const containerWidth = container.clientWidth;
         const containerHeight = container.clientHeight;
         
-        // 设置更高的分辨率
-        const devicePixelRatio = window.devicePixelRatio || 1;
-        
-        // 设置画布的CSS大小
-        canvas.style.width = containerWidth + 'px';
-        canvas.style.height = containerHeight + 'px';
-        
-        // 重置上下文状态
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        
-        // 设置画布的实际像素大小（更高分辨率）
-        canvas.width = containerWidth * devicePixelRatio;
-        canvas.height = containerHeight * devicePixelRatio;
-        
-        // 根据设备像素比例缩放上下文
-        ctx.scale(devicePixelRatio, devicePixelRatio);
+        canvas.width = containerWidth;
+        canvas.height = containerHeight;
 
         // 設置白色背景
         ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, containerWidth, containerHeight);
-        
-        // 设置高质量图像渲染
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // 重新繪製
         redrawCanvas();
@@ -86,66 +59,45 @@ document.addEventListener('DOMContentLoaded', function () {
 
         reader.onload = function (event) {
             const img = new Image();
-            
-            // 设置跨域属性以避免某些情况下的跨域问题
-            img.crossOrigin = "Anonymous";
-            
             img.onload = function () {
-                // 保存原始图片信息
-                const imgNaturalWidth = img.naturalWidth;
-                const imgNaturalHeight = img.naturalHeight;
-                
-                // 获取设备像素比例
-                const devicePixelRatio = window.devicePixelRatio || 1;
-                const displayWidth = canvas.width / devicePixelRatio;
-                const displayHeight = canvas.height / devicePixelRatio;
-                
                 // 清除畫布
-                ctx.clearRect(0, 0, displayWidth, displayHeight);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, displayWidth, displayHeight);
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 // 計算圖片的長寬比
-                const imgRatio = imgNaturalWidth / imgNaturalHeight;
+                const imgRatio = img.width / img.height;
                 // 計算畫布的長寬比
-                const canvasRatio = displayWidth / displayHeight;
+                const canvasRatio = canvas.width / canvas.height;
                 
-                let x, y, width, height;
+                let scale, x, y, width, height;
                 
                 // 根據圖片長寬比決定如何填充畫布
                 if (imgRatio > canvasRatio) {
                     // 圖片較寬，以高度為準
-                    height = displayHeight * 0.9;
+                    height = canvas.height * 0.9;
                     width = height * imgRatio;
-                    x = (displayWidth - width) / 2;
-                    y = (displayHeight - height) / 2;
+                    x = (canvas.width - width) / 2;
+                    y = (canvas.height - height) / 2;
                 } else {
                     // 圖片較高，以寬度為準
-                    width = displayWidth * 0.9;
+                    width = canvas.width * 0.9;
                     height = width / imgRatio;
-                    x = (displayWidth - width) / 2;
-                    y = (displayHeight - height) / 2;
+                    x = (canvas.width - width) / 2;
+                    y = (canvas.height - height) / 2;
                 }
 
-                // 高品質繪製圖片
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(
-                    img, 
-                    0, 0, imgNaturalWidth, imgNaturalHeight,
-                    x, y, width, height
-                );
+                // 繪製圖片
+                ctx.drawImage(img, x, y, width, height);
 
-                // 保存原始圖片和當前圖片，确保保留原始尺寸信息
+                // 保存原始圖片和當前圖片
                 originalImage = {
                     element: img,
                     x: x,
                     y: y,
                     width: width,
                     height: height,
-                    ratio: imgRatio,
-                    naturalWidth: imgNaturalWidth,
-                    naturalHeight: imgNaturalHeight
+                    ratio: imgRatio
                 };
 
                 currentImage = { ...originalImage };
@@ -232,20 +184,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // 載入相框圖片
         const img = new Image();
-        img.crossOrigin = "Anonymous";
         img.onload = function () {
-            // 保存相框原始尺寸和比例
-            const frameNaturalWidth = img.naturalWidth;
-            const frameNaturalHeight = img.naturalHeight;
-            
             frameImage = {
                 element: img,
-                src: frameSrc,
-                width: img.naturalWidth,
-                height: img.naturalHeight,
-                ratio: img.naturalWidth / img.naturalHeight,
-                naturalWidth: frameNaturalWidth,
-                naturalHeight: frameNaturalHeight
+                src: frameSrc
             };
             
             drawFrame();
@@ -264,78 +206,28 @@ document.addEventListener('DOMContentLoaded', function () {
     // 繪製相框
     function drawFrame() {
         if (frameImage) {
-            // 獲取設備像素比例
-            const devicePixelRatio = window.devicePixelRatio || 1;
-            const displayWidth = canvas.width / devicePixelRatio;
-            const displayHeight = canvas.height / devicePixelRatio;
-            
             // 填充白色背景
             ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, displayWidth, displayHeight);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 計算相框在畫布中的適當尺寸
-            let frameWidth, frameHeight;
-            
-            // 保持相框的原始比例
-            if (frameImage.ratio > displayWidth / displayHeight) {
-                // 相框较宽，适应画布宽度
-                frameWidth = displayWidth;
-                frameHeight = frameWidth / frameImage.ratio;
-            } else {
-                // 相框较高，适应画布高度
-                frameHeight = displayHeight;
-                frameWidth = frameHeight * frameImage.ratio;
-            }
-            
-            // 居中绘制相框
-            const frameX = (displayWidth - frameWidth) / 2;
-            const frameY = (displayHeight - frameHeight) / 2;
-            
-            // 如果有上傳圖片，先按相框区域绘制图片
+            // 如果有上傳圖片，先繪製圖片
             if (currentImage) {
-                // 假设相框中图片区域占相框的80%（与下载函数一致）
-                const imgAreaWidth = frameWidth * 0.8;
-                const imgAreaHeight = frameHeight * 0.8;
-                
-                // 图片区域的位置（居中）
-                const imgAreaX = frameX + (frameWidth - imgAreaWidth) / 2;
-                const imgAreaY = frameY + (frameHeight - imgAreaHeight) / 2;
-                
-                // 计算图片在图片区域内的缩放
-                const imgRatio = currentImage.ratio;
-                let imgWidth, imgHeight, imgX, imgY;
-                
-                if (imgRatio > imgAreaWidth / imgAreaHeight) {
-                    // 图片较宽，以宽度为基准
-                    imgWidth = imgAreaWidth;
-                    imgHeight = imgWidth / imgRatio;
-                    imgX = imgAreaX;
-                    imgY = imgAreaY + (imgAreaHeight - imgHeight) / 2;
-                } else {
-                    // 图片较高，以高度为基准
-                    imgHeight = imgAreaHeight;
-                    imgWidth = imgHeight * imgRatio;
-                    imgX = imgAreaX + (imgAreaWidth - imgWidth) / 2;
-                    imgY = imgAreaY;
-                }
-                
-                // 绘制缩放后的图片
                 ctx.drawImage(
                     currentImage.element,
-                    0, 0, currentImage.naturalWidth, currentImage.naturalHeight,
-                    imgX, imgY, imgWidth, imgHeight
+                    currentImage.x,
+                    currentImage.y,
+                    currentImage.width,
+                    currentImage.height
                 );
             }
             
-            // 使用CSS图像平滑算法进行高质量绘制
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            
-            // 繪製高品質相框 - 使用完整的原始相框图像
+            // 繪製相框 - 相框應該覆蓋整個畫布，保持2:3比例
             ctx.drawImage(
                 frameImage.element,
-                0, 0, frameImage.naturalWidth, frameImage.naturalHeight, // 源相框的完整尺寸
-                frameX, frameY, frameWidth, frameHeight // 目标位置和尺寸
+                0,
+                0,
+                canvas.width,
+                canvas.height
             );
             
             // 隱藏上傳提示訊息
@@ -347,53 +239,33 @@ document.addEventListener('DOMContentLoaded', function () {
     function redrawCanvas() {
         if (!canvas || !ctx) return;
         
-        // 获取设备像素比例
-        const devicePixelRatio = window.devicePixelRatio || 1;
-        const displayWidth = canvas.width / devicePixelRatio;
-        const displayHeight = canvas.height / devicePixelRatio;
-        
         // 清除畫布
-        ctx.clearRect(0, 0, displayWidth, displayHeight);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // 填充白色背景
         ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, displayWidth, displayHeight);
-        
-        // 设置高质量图像渲染
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 如果有相框和图片，按照相框绘制方式重绘
-        if (currentImage && frameImage) {
-            drawFrame();
-        } 
-        // 只有图片没有相框的情况
-        else if (currentImage) {
-            // 计算图片在画布中的适当位置和尺寸
-            let displayWidth, displayHeight, displayX, displayY;
-            const imgRatio = currentImage.ratio;
-            const canvasRatio = canvas.width / canvas.height;
-            
-            if (imgRatio > canvasRatio) {
-                // 图片较宽，以高度为准
-                displayHeight = canvas.height * 0.9 / devicePixelRatio;
-                displayWidth = displayHeight * imgRatio;
-                displayX = (canvas.width / devicePixelRatio - displayWidth) / 2;
-                displayY = (canvas.height / devicePixelRatio - displayHeight) / 2;
-            } else {
-                // 图片较高，以宽度为准
-                displayWidth = canvas.width * 0.9 / devicePixelRatio;
-                displayHeight = displayWidth / imgRatio;
-                displayX = (canvas.width / devicePixelRatio - displayWidth) / 2;
-                displayY = (canvas.height / devicePixelRatio - displayHeight) / 2;
-            }
-            
-            // 绘制图片
+        // 繪製當前圖片（如果有）
+        if (currentImage) {
             ctx.drawImage(
                 currentImage.element,
-                0, 0, currentImage.naturalWidth, currentImage.naturalHeight,
-                displayX, displayY, displayWidth, displayHeight
+                currentImage.x,
+                currentImage.y,
+                currentImage.width,
+                currentImage.height
             );
+            
+            // 如果有相框，繪製相框
+            if (frameImage) {
+                ctx.drawImage(
+                    frameImage.element,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+            }
         }
     }
 
@@ -406,20 +278,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById('loading').style.display = 'flex';
 
-        // 创建一个高分辨率的临时画布
+        // 創建臨時畫布
         const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = currentImage.width;
+        tempCanvas.height = currentImage.height;
         const tempCtx = tempCanvas.getContext('2d');
-        
-        // 使用原始图片的尺寸
-        tempCanvas.width = originalImage.naturalWidth;
-        tempCanvas.height = originalImage.naturalHeight;
 
-        // 绘制原始图片到临时画布，不进行任何缩放
-        tempCtx.drawImage(
-            originalImage.element, 
-            0, 0, originalImage.naturalWidth, originalImage.naturalHeight,
-            0, 0, originalImage.naturalWidth, originalImage.naturalHeight
-        );
+        // 繪製當前圖片到臨時畫布
+        tempCtx.drawImage(currentImage.element, 0, 0, currentImage.width, currentImage.height);
 
         // 獲取圖片數據
         const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
@@ -458,19 +324,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // 創建新圖片
         const newImg = new Image();
-        newImg.crossOrigin = "Anonymous";
         newImg.onload = function () {
-            // 保留原始图片的信息，但更新为处理后的图片对象
-            currentImage = {
-                ...originalImage,
-                element: newImg
-            };
-            
-            // 重绘画布
+            currentImage.element = newImg;
             redrawCanvas();
             document.getElementById('loading').style.display = 'none';
         };
-        newImg.src = tempCanvas.toDataURL('image/png', 0.9);
+
+        newImg.src = tempCanvas.toDataURL();
     }
 
     // 重置濾鏡
@@ -492,10 +352,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('saturation-value').textContent = '0';
 
         if (originalImage) {
-            // 重置为原始图片
             currentImage = { ...originalImage };
-            
-            // 重绘画布
             redrawCanvas();
         }
     }
@@ -507,81 +364,10 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // 创建一个适应相框比例的临时画布
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        
-        // 获取当前选中的相框路径
-        const frameSrc = document.querySelector('.frame-btn.selected').getAttribute('data-frame');
-        const frameImg = new Image();
-        frameImg.crossOrigin = "Anonymous";
-        
-        // 使用异步加载相框后再处理图片
-        frameImg.onload = function() {
-            // 计算相框的比例
-            const frameRatio = frameImg.naturalWidth / frameImg.naturalHeight;
-            
-            // 设置输出画布大小 - 使用一个合适的分辨率，不需要太大
-            const outputWidth = 1200; // 设置一个合理的输出宽度
-            const outputHeight = outputWidth / frameRatio;
-            
-            tempCanvas.width = outputWidth;
-            tempCanvas.height = outputHeight;
-            
-            // 填充白色背景
-            tempCtx.fillStyle = 'white';
-            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            
-            // 计算图片在相框中的适当尺寸和位置
-            // 假设相框中图片区域占相框的80%（这个值可以根据相框设计调整）
-            const imgAreaWidth = tempCanvas.width * 0.8;
-            const imgAreaHeight = tempCanvas.height * 0.8;
-            
-            // 图片区域的位置（居中）
-            const imgAreaX = (tempCanvas.width - imgAreaWidth) / 2;
-            const imgAreaY = (tempCanvas.height - imgAreaHeight) / 2;
-            
-            // 计算图片在图片区域内的缩放
-            const imgRatio = originalImage.naturalWidth / originalImage.naturalHeight;
-            let imgWidth, imgHeight, imgX, imgY;
-            
-            if (imgRatio > imgAreaWidth / imgAreaHeight) {
-                // 图片较宽，以宽度为基准
-                imgWidth = imgAreaWidth;
-                imgHeight = imgWidth / imgRatio;
-                imgX = imgAreaX;
-                imgY = imgAreaY + (imgAreaHeight - imgHeight) / 2;
-            } else {
-                // 图片较高，以高度为基准
-                imgHeight = imgAreaHeight;
-                imgWidth = imgHeight * imgRatio;
-                imgX = imgAreaX + (imgAreaWidth - imgWidth) / 2;
-                imgY = imgAreaY;
-            }
-            
-            // 绘制缩放后的图片
-            tempCtx.drawImage(
-                originalImage.element,
-                0, 0, originalImage.naturalWidth, originalImage.naturalHeight, // 源图像的位置和尺寸
-                imgX, imgY, imgWidth, imgHeight // 目标位置和尺寸（适应相框）
-            );
-            
-            // 绘制相框
-            tempCtx.drawImage(
-                frameImg,
-                0, 0, frameImg.naturalWidth, frameImg.naturalHeight, // 源相框的位置和尺寸
-                0, 0, tempCanvas.width, tempCanvas.height // 目标位置和尺寸
-            );
-            
-            // 下载图片
-            const link = document.createElement('a');
-            link.href = tempCanvas.toDataURL('image/png', 0.9); // 稍微降低质量以减小文件大小
-            link.download = 'framed_photo.png';
-            link.click();
-        };
-        
-        // 开始加载相框图片
-        frameImg.src = frameSrc;
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'framed_photo.png';
+        link.click();
     }
 });
 
