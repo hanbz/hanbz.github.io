@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let originalImage = null;
     let currentImage = null;
     let frameImage = null;
+    let highResFrames = {}; // 保存預加載的高分辨率相框
     let isDragging = false;
     let dragStartX = 0;
     let dragStartY = 0;
@@ -27,6 +28,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // 初始化白色背景
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 預加載所有高分辨率相框
+    preloadHighResFrames();
     
     // 默認選擇相框1
     applyFrame('./assets/frames/網站_相框01.png');
@@ -180,14 +184,22 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         
         // 設置當前選中的相框按鈕
-        document.querySelector(`.frame-btn[data-frame="${frameSrc}"]`).classList.add('selected');
+        const selectedButton = document.querySelector(`.frame-btn[data-frame="${frameSrc}"]`);
+        selectedButton.classList.add('selected');
+        
+        // 獲取高分辨率版本的URL
+        const highResFrameSrc = selectedButton.getAttribute('data-highres');
 
         // 載入相框圖片
         const img = new Image();
         img.onload = function () {
+            // 使用原始圖片的尺寸和解析度
             frameImage = {
                 element: img,
-                src: frameSrc
+                src: frameSrc,
+                highResSrc: highResFrameSrc,
+                width: img.naturalWidth,
+                height: img.naturalHeight
             };
             
             drawFrame();
@@ -221,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
             }
             
-            // 繪製相框 - 相框應該覆蓋整個畫布，保持2:3比例
+            // 繪製相框 - 保持原始相框的解析度，但縮放到畫布大小
             ctx.drawImage(
                 frameImage.element,
                 0,
@@ -258,6 +270,10 @@ document.addEventListener('DOMContentLoaded', function () {
             
             // 如果有相框，繪製相框
             if (frameImage) {
+                // 使用高品質的相框渲染
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                
                 ctx.drawImage(
                     frameImage.element,
                     0,
@@ -364,10 +380,140 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = 'framed_photo.png';
-        link.click();
+        document.getElementById('loading').style.display = 'flex';
+
+        // 創建一個高分辨率的臨時畫布用於下載
+        const downloadCanvas = document.createElement('canvas');
+        // 使用原始相框的解析度或至少1920px的寬度（如果沒有相框）
+        const downloadWidth = frameImage ? Math.max(frameImage.width, 1920) : 1920;
+        const downloadHeight = (downloadWidth / canvas.width) * canvas.height;
+        
+        downloadCanvas.width = downloadWidth;
+        downloadCanvas.height = downloadHeight;
+        
+        const downloadCtx = downloadCanvas.getContext('2d');
+        downloadCtx.fillStyle = 'white';
+        downloadCtx.fillRect(0, 0, downloadWidth, downloadHeight);
+        
+        // 設置高品質圖像渲染
+        downloadCtx.imageSmoothingEnabled = true;
+        downloadCtx.imageSmoothingQuality = 'high';
+        
+        // 計算縮放比例
+        const scale = downloadWidth / canvas.width;
+        
+        // 繪製圖片到高分辨率畫布
+        if (currentImage) {
+            downloadCtx.drawImage(
+                currentImage.element,
+                currentImage.x * scale,
+                currentImage.y * scale,
+                currentImage.width * scale,
+                currentImage.height * scale
+            );
+            
+            // 如果有相框，加載高分辨率相框並繪製
+            if (frameImage && frameImage.highResSrc) {
+                // 檢查是否已經預加載
+                if (highResFrames[frameImage.highResSrc]) {
+                    // 使用預加載的高分辨率相框
+                    downloadCtx.drawImage(
+                        highResFrames[frameImage.highResSrc],
+                        0,
+                        0,
+                        downloadWidth,
+                        downloadHeight
+                    );
+                    
+                    // 下載高分辨率圖片
+                    const link = document.createElement('a');
+                    link.href = downloadCanvas.toDataURL('image/png');
+                    link.download = 'framed_photo.png';
+                    document.getElementById('loading').style.display = 'none';
+                    link.click();
+                } else {
+                    // 如果沒有預加載，現在加載
+                    const highResFrame = new Image();
+                    highResFrame.onload = function() {
+                        // 儲存到預加載對象中，以供將來使用
+                        highResFrames[frameImage.highResSrc] = highResFrame;
+                        
+                        // 繪製高分辨率相框
+                        downloadCtx.drawImage(
+                            highResFrame,
+                            0,
+                            0,
+                            downloadWidth,
+                            downloadHeight
+                        );
+                        
+                        // 下載高分辨率圖片
+                        const link = document.createElement('a');
+                        link.href = downloadCanvas.toDataURL('image/png');
+                        link.download = 'framed_photo.png';
+                        document.getElementById('loading').style.display = 'none';
+                        link.click();
+                    };
+                    
+                    highResFrame.onerror = function() {
+                        console.error("Error loading high-res frame");
+                        // 如果高分辨率相框加載失敗，使用普通相框
+                        downloadCtx.drawImage(
+                            frameImage.element,
+                            0,
+                            0,
+                            downloadWidth,
+                            downloadHeight
+                        );
+                        
+                        // 下載圖片
+                        const link = document.createElement('a');
+                        link.href = downloadCanvas.toDataURL('image/png');
+                        link.download = 'framed_photo.png';
+                        document.getElementById('loading').style.display = 'none';
+                        link.click();
+                    };
+                    
+                    // 開始加載高分辨率相框
+                    highResFrame.src = frameImage.highResSrc;
+                }
+            } else {
+                // 如果沒有高分辨率相框，使用普通相框
+                if (frameImage) {
+                    downloadCtx.drawImage(
+                        frameImage.element,
+                        0,
+                        0,
+                        downloadWidth,
+                        downloadHeight
+                    );
+                }
+                
+                // 下載圖片
+                const link = document.createElement('a');
+                link.href = downloadCanvas.toDataURL('image/png');
+                link.download = 'framed_photo.png';
+                document.getElementById('loading').style.display = 'none';
+                link.click();
+            }
+        } else {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    // 預加載所有高分辨率相框
+    function preloadHighResFrames() {
+        document.querySelectorAll('.frame-btn').forEach(button => {
+            const highResSrc = button.getAttribute('data-highres');
+            if (highResSrc) {
+                const img = new Image();
+                img.onload = function() {
+                    highResFrames[highResSrc] = img;
+                    console.log(`預加載相框: ${highResSrc}`);
+                };
+                img.src = highResSrc;
+            }
+        });
     }
 });
 
