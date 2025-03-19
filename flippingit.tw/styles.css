@@ -860,7 +860,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .frame-btn.selected .frame-img-btn {
-    border: 3px solid var(--text-color);
+    border: none;
     border-radius: 5px;
 }
 
