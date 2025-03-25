@@ -357,19 +357,47 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // 將畫布轉為Blob對象
-        canvas.toBlob(function(blob) {
-            // 創建URL
-            const blobUrl = URL.createObjectURL(blob);
+        try {
+            // 針對移動設備的處理方式
+            if (isMobile) {
+                // 先創建一個a元素，以確保在移動設備上能正確打開
+                const link = document.createElement('a');
+                link.target = '_blank';
+                
+                // 使用toBlob方法轉換畫布內容
+                canvas.toBlob(function(blob) {
+                    // 使用更長的超時時間確保移動瀏覽器有足夠時間處理
+                    const blobUrl = URL.createObjectURL(blob);
+                    link.href = blobUrl;
+                    
+                    // 模擬點擊事件
+                    const clickEvent = new MouseEvent('click');
+                    link.dispatchEvent(clickEvent);
+                    
+                    // 延長釋放時間，確保移動設備能夠完全加載
+                    setTimeout(function() {
+                        URL.revokeObjectURL(blobUrl);
+                    }, 3000); // 延長至3秒
+                }, 'image/png', 1.0); // 使用最高品質設定
+            } else {
+                // 桌面版本的處理方式
+                canvas.toBlob(function(blob) {
+                    const blobUrl = URL.createObjectURL(blob);
+                    window.open(blobUrl, '_blank');
+                    
+                    setTimeout(function() {
+                        URL.revokeObjectURL(blobUrl);
+                    }, 1000);
+                }, 'image/png');
+            }
+        } catch (error) {
+            // 如果有任何錯誤，使用備用方案
+            console.error('使用blob開啟照片失敗:', error);
             
-            // 開啟新分頁
-            window.open(blobUrl, '_blank');
-            
-            // 延遲釋放URL資源，確保新分頁已正確載入
-            setTimeout(function() {
-                URL.revokeObjectURL(blobUrl);
-            }, 1000);
-        }, 'image/png');
+            // 備用方案：直接使用dataURL
+            const dataURL = canvas.toDataURL('image/png');
+            window.open(dataURL, '_blank');
+        }
     }
 
     // 啟動相機
