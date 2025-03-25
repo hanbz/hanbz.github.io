@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     let video = null;
     let isStreamActive = false;
+    let isFrontCamera = false; // 追踪當前使用的鏡頭，默認使用後置鏡頭
 
     // 檢查是否在移動裝置上
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -22,6 +23,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // 初始化事件監聽器
     initEventListeners();
     resizeCanvas();
+    
+    // 如果是移動設備，添加切換鏡頭按鈕
+    if (isMobile) {
+        createSwitchCameraButton();
+    }
 
     // 窗口大小改變時調整畫布
     window.addEventListener('resize', resizeCanvas);
@@ -40,6 +46,59 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(function() {
         startCamera();
     }, 500);
+
+    // 創建切換鏡頭按鈕
+    function createSwitchCameraButton() {
+        // 檢查按鈕是否已存在
+        if (document.getElementById('switch-camera-btn')) {
+            return;
+        }
+        
+        // 創建按鈕容器
+        const switchButtonContainer = document.createElement('div');
+        switchButtonContainer.className = 'switch-camera-container';
+        
+        // 創建切換按鈕
+        const switchButton = document.createElement('button');
+        switchButton.id = 'switch-camera-btn';
+        switchButton.className = 'switch-camera-btn';
+        
+        // 設置默認圖標（後置鏡頭時顯示前置鏡頭圖標，表示可以切換到前置）
+        switchButton.innerHTML = '<i class="fas fa-user"></i>';
+        switchButton.title = '切換到前置鏡頭';
+        
+        // 添加事件監聽器
+        switchButton.addEventListener('click', switchCamera);
+        
+        // 添加按鈕到容器
+        switchButtonContainer.appendChild(switchButton);
+        
+        // 添加容器到畫布容器中
+        const canvasContainer = document.querySelector('.canvas-container');
+        canvasContainer.appendChild(switchButtonContainer);
+    }
+    
+    // 切換鏡頭函數
+    function switchCamera() {
+        isFrontCamera = !isFrontCamera; // 切換鏡頭狀態
+        
+        // 更新按鈕圖標以反映當前鏡頭狀態
+        const switchButton = document.getElementById('switch-camera-btn');
+        if (switchButton) {
+            if (isFrontCamera) {
+                switchButton.innerHTML = '<i class="fas fa-camera"></i>';
+                switchButton.title = '切換到後置鏡頭';
+            } else {
+                switchButton.innerHTML = '<i class="fas fa-user"></i>';
+                switchButton.title = '切換到前置鏡頭';
+            }
+        }
+        
+        // 如果相機已經開啟，則重新啟動以應用新的設置
+        if (isStreamActive) {
+            startCamera();
+        }
+    }
 
     // 添加畫布大小調整函數
     function resizeCanvas() {
@@ -121,8 +180,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // 重置濾鏡
         document.getElementById('reset-filters').addEventListener('click', resetFilters);
 
-        // 下載圖片
-        document.getElementById('download-btn').addEventListener('click', downloadImage);
+        // 在新分頁開啟照片
+        document.getElementById('download-btn').addEventListener('click', openPhotoInNewTab);
     }
 
     // 修改應用相框函數
@@ -349,8 +408,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 下載圖片
-    function downloadImage() {
+    // 在新分頁開啟照片
+    function openPhotoInNewTab() {
         if (!currentImage) {
             alert('請先拍攝一張照片');
             return;
@@ -358,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/png');
-        link.download = 'framed_photo.png';
+        link.target = "_blank";
         link.click();
     }
 
@@ -379,10 +438,10 @@ document.addEventListener('DOMContentLoaded', function () {
             document.body.appendChild(video);
         }
         
-        // 請求攝像頭權限
+        // 請求攝像頭權限，根據當前的鏡頭狀態選擇前置或後置鏡頭
         navigator.mediaDevices.getUserMedia({
             video: {
-                facingMode: 'environment',
+                facingMode: isFrontCamera ? 'user' : 'environment',
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
             },
