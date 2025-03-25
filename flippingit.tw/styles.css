@@ -653,7 +653,7 @@ input[type="range"]::-webkit-slider-thumb {
         height: auto;
         margin: 0;
     }
-
+    
     .frame-btn {
         margin: 0;
         padding: 0;
@@ -728,12 +728,6 @@ input[type="range"]::-webkit-slider-thumb {
 
     .frame-btn {
         margin: 0 2px;
-    }
-
-    .switch-camera-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 14px;
     }
 }
 
@@ -944,34 +938,4 @@ input[type="range"]::-webkit-slider-thumb {
         max-width: 100%;
         max-height: 80vh;
     }
-}
-
-.switch-camera-container {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 100;
-}
-
-.switch-camera-btn {
-    background-color: rgba(0, 100, 180, 0.8);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 5px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s ease;
-}
-
-.switch-camera-btn:hover {
-    background-color: rgba(0, 100, 180, 1);
-    transform: scale(1.05);
 }
