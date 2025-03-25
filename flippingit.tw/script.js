@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
         contrast: 0,
         saturation: 0
     };
+    let video = null;
+    let isStreamActive = false;
 
     // 檢查是否在移動裝置上
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -28,8 +30,16 @@ document.addEventListener('DOMContentLoaded', function () {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    // 修改提示文字
+    document.getElementById('no-image-message').textContent = '正在啟動相機...';
+    
     // 默認選擇相框1
     applyFrame('./assets/frames/網站_相框01.png');
+    
+    // 頁面載入時立即啟動相機
+    setTimeout(function() {
+        startCamera();
+    }, 500);
 
     // 添加畫布大小調整函數
     function resizeCanvas() {
@@ -50,81 +60,26 @@ document.addEventListener('DOMContentLoaded', function () {
         redrawCanvas();
     }
 
-    // 上傳圖片
-    function uploadImage(file) {
-        document.getElementById('loading').style.display = 'flex';
-        document.getElementById('no-image-message').style.display = 'none';
-
-        const reader = new FileReader();
-
-        reader.onload = function (event) {
-            const img = new Image();
-            img.onload = function () {
-                // 清除畫布
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // 計算圖片的長寬比
-                const imgRatio = img.width / img.height;
-                // 計算畫布的長寬比
-                const canvasRatio = canvas.width / canvas.height;
-                
-                let scale, x, y, width, height;
-                
-                // 根據圖片長寬比決定如何填充畫布
-                if (imgRatio > canvasRatio) {
-                    // 圖片較寬，以高度為準
-                    height = canvas.height * 0.9;
-                    width = height * imgRatio;
-                    x = (canvas.width - width) / 2;
-                    y = (canvas.height - height) / 2;
-                } else {
-                    // 圖片較高，以寬度為準
-                    width = canvas.width * 0.9;
-                    height = width / imgRatio;
-                    x = (canvas.width - width) / 2;
-                    y = (canvas.height - height) / 2;
-                }
-
-                // 繪製圖片
-                ctx.drawImage(img, x, y, width, height);
-
-                // 保存原始圖片和當前圖片
-                originalImage = {
-                    element: img,
-                    x: x,
-                    y: y,
-                    width: width,
-                    height: height,
-                    ratio: imgRatio
-                };
-
-                currentImage = { ...originalImage };
-
-                // 如果有相框，重新應用
-                if (frameImage) {
-                    drawFrame();
-                }
-
-                document.getElementById('loading').style.display = 'none';
-
-                // 重置濾鏡
-                resetFilters();
-            };
-
-            img.src = event.target.result;
-        };
-
-        reader.readAsDataURL(file);
-    }
-
     // 初始化事件
     function initEventListeners() {
-        // 上傳圖片 - 不再需要點擊按鈕事件，因為我們使用label直接觸發file input
-        document.getElementById('file-input').addEventListener('change', function (e) {
-            if (this.files && this.files[0]) {
-                uploadImage(this.files[0]);
+        // 拍攝照片
+        document.getElementById('take-photo-btn').addEventListener('click', capturePhoto);
+        
+        // 重新拍攝
+        document.getElementById('retake-photo-btn').addEventListener('click', function() {
+            // 清除已經捕獲的照片
+            if (currentImage) {
+                // 保存當前照片作為備份，以便需要時恢復
+                const backupImage = { ...currentImage };
+                
+                // 清除當前照片
+                currentImage = null;
+                originalImage = null;
+                
+                // 啟動相機
+                startCamera();
+            } else {
+                startCamera();
             }
         });
 
@@ -206,19 +161,22 @@ document.addEventListener('DOMContentLoaded', function () {
     // 繪製相框
     function drawFrame() {
         if (frameImage) {
-            // 填充白色背景
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // 如果有上傳圖片，先繪製圖片
-            if (currentImage) {
-                ctx.drawImage(
-                    currentImage.element,
-                    currentImage.x,
-                    currentImage.y,
-                    currentImage.width,
-                    currentImage.height
-                );
+            // 如果有相機串流，保留視頻畫面不刪除
+            if (!isStreamActive) {
+                // 填充白色背景
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 如果有上傳圖片，先繪製圖片
+                if (currentImage) {
+                    ctx.drawImage(
+                        currentImage.element,
+                        currentImage.x,
+                        currentImage.y,
+                        currentImage.width,
+                        currentImage.height
+                    );
+                }
             }
             
             // 繪製相框 - 相框應該覆蓋整個畫布，保持2:3比例
@@ -230,8 +188,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 canvas.height
             );
             
-            // 隱藏上傳提示訊息
-            document.getElementById('no-image-message').style.display = 'none';
+            // 隱藏上傳提示訊息，除非相機正在啟動中
+            if (document.getElementById('no-image-message').textContent !== '相機啟動中...' &&
+                document.getElementById('no-image-message').textContent !== '正在啟動相機...') {
+                document.getElementById('no-image-message').style.display = 'none';
+            }
         }
     }
 
@@ -248,12 +209,40 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // 繪製當前圖片（如果有）
         if (currentImage) {
+            // 重新計算圖片在畫布上的位置和尺寸
+            const imageRatio = currentImage.ratio;
+            const canvasRatio = canvas.width / canvas.height;
+            
+            let x, y, width, height;
+            
+            // 根據圖片長寬比決定如何填充畫布
+            if (imageRatio > canvasRatio) {
+                // 圖片較寬，以寬度為準
+                width = canvas.width * 0.9;
+                height = width / imageRatio;
+                x = (canvas.width - width) / 2;
+                y = (canvas.height - height) / 2;
+            } else {
+                // 圖片較高，以高度為準
+                height = canvas.height * 0.9;
+                width = height * imageRatio;
+                x = (canvas.width - width) / 2;
+                y = (canvas.height - height) / 2;
+            }
+            
+            // 更新當前圖片的位置和尺寸
+            currentImage.x = x;
+            currentImage.y = y;
+            currentImage.width = width;
+            currentImage.height = height;
+            
+            // 繪製圖片
             ctx.drawImage(
                 currentImage.element,
-                currentImage.x,
-                currentImage.y,
-                currentImage.width,
-                currentImage.height
+                x,
+                y,
+                width,
+                height
             );
             
             // 如果有相框，繪製相框
@@ -266,13 +255,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     canvas.height
                 );
             }
+        } else if (isStreamActive && video) {
+            // 如果是相機預覽狀態，繼續繪製視頻預覽
+            drawVideoPreview();
         }
     }
 
     // 應用濾鏡
     function applyFilters() {
         if (!currentImage) {
-            alert('請先上傳一張圖片');
+            alert('請先拍攝一張照片');
             return;
         }
 
@@ -360,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 下載圖片
     function downloadImage() {
         if (!currentImage) {
-            alert('請先上傳一張圖片');
+            alert('請先拍攝一張照片');
             return;
         }
 
@@ -368,6 +360,204 @@ document.addEventListener('DOMContentLoaded', function () {
         link.href = canvas.toDataURL('image/png');
         link.download = 'framed_photo.png';
         link.click();
+    }
+
+    // 啟動相機
+    function startCamera() {
+        document.getElementById('loading').style.display = 'flex';
+        document.getElementById('no-image-message').style.display = 'flex';
+        document.getElementById('no-image-message').textContent = '相機啟動中...';
+        
+        // 停止可能已經存在的相機串流
+        stopCamera();
+        
+        // 創建視頻元素（如果尚未創建）
+        if (!video) {
+            video = document.createElement('video');
+            video.autoplay = true;
+            video.style.display = 'none';
+            document.body.appendChild(video);
+        }
+        
+        // 請求攝像頭權限
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        })
+        .then(function(stream) {
+            video.srcObject = stream;
+            isStreamActive = true;
+            
+            // 等待視頻元數據加載完成
+            video.onloadedmetadata = function() {
+                // 隱藏提示信息
+                document.getElementById('no-image-message').style.display = 'none';
+                // 顯示視頻預覽
+                drawVideoPreview();
+            };
+            
+            document.getElementById('loading').style.display = 'none';
+        })
+        .catch(function(error) {
+            console.error("無法啟動相機: ", error);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('no-image-message').style.display = 'flex';
+            document.getElementById('no-image-message').textContent = '無法啟動相機，請檢查相機權限';
+            alert('無法啟動相機，請檢查相機權限。');
+        });
+    }
+    
+    // 在畫布上繪製視頻預覽
+    function drawVideoPreview() {
+        if (!video || !isStreamActive) return;
+        
+        // 清除畫布
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 獲取視頻尺寸
+        const videoWidth = video.videoWidth;
+        const videoHeight = video.videoHeight;
+        
+        if (videoWidth === 0 || videoHeight === 0) {
+            // 視頻尺寸未就緒，等待下一幀
+            requestAnimationFrame(drawVideoPreview);
+            return;
+        }
+        
+        // 計算視頻和畫布的長寬比
+        const videoRatio = videoWidth / videoHeight;
+        const canvasRatio = canvas.width / canvas.height;
+        
+        let x, y, width, height;
+        
+        // 根據視頻長寬比決定如何填充畫布
+        if (videoRatio > canvasRatio) {
+            // 視頻較寬，以寬度為準
+            width = canvas.width * 0.9;
+            height = width / videoRatio;
+            x = (canvas.width - width) / 2;
+            y = (canvas.height - height) / 2;
+        } else {
+            // 視頻較高，以高度為準
+            height = canvas.height * 0.9;
+            width = height * videoRatio;
+            x = (canvas.width - width) / 2;
+            y = (canvas.height - height) / 2;
+        }
+        
+        // 繪製視頻
+        ctx.drawImage(video, x, y, width, height);
+        
+        // 如果有相框，重新應用
+        if (frameImage) {
+            drawFrame();
+        }
+        
+        // 繼續繪製預覽（動畫）
+        if (isStreamActive) {
+            requestAnimationFrame(drawVideoPreview);
+        }
+    }
+    
+    // 捕獲照片
+    function capturePhoto() {
+        if (!video || !isStreamActive) {
+            alert('相機未啟動，請稍候...');
+            return;
+        }
+
+        document.getElementById('loading').style.display = 'flex';
+        
+        // 創建一個臨時畫布來捕獲整個視頻幀，保持原始尺寸
+        const tempCanvas = document.createElement('canvas');
+        const videoWidth = video.videoWidth;
+        const videoHeight = video.videoHeight;
+        
+        // 設置臨時畫布為視頻原始尺寸
+        tempCanvas.width = videoWidth;
+        tempCanvas.height = videoHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        // 將視頻幀繪製到臨時畫布上（保持原始尺寸）
+        tempCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
+        
+        // 將臨時畫布內容轉換為圖片
+        const img = new Image();
+        img.onload = function() {
+            // 計算圖片在主畫布上的位置和尺寸
+            const imageRatio = videoWidth / videoHeight;
+            const canvasRatio = canvas.width / canvas.height;
+            
+            let x, y, width, height;
+            
+            // 根據圖片長寬比決定如何填充畫布
+            if (imageRatio > canvasRatio) {
+                // 圖片較寬，以寬度為準
+                width = canvas.width * 0.9;
+                height = width / imageRatio;
+                x = (canvas.width - width) / 2;
+                y = (canvas.height - height) / 2;
+            } else {
+                // 圖片較高，以高度為準
+                height = canvas.height * 0.9;
+                width = height * imageRatio;
+                x = (canvas.width - width) / 2;
+                y = (canvas.height - height) / 2;
+            }
+            
+            // 保存原始圖片和當前圖片的數據
+            originalImage = {
+                element: img,
+                x: x,
+                y: y,
+                width: width,
+                height: height,
+                ratio: imageRatio,
+                originalWidth: videoWidth,
+                originalHeight: videoHeight
+            };
+            
+            currentImage = { ...originalImage };
+            
+            // 停止相機串流
+            stopCamera();
+            
+            // 清除畫布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 繪製圖片
+            ctx.drawImage(img, x, y, width, height);
+            
+            // 如果有相框，重新應用
+            if (frameImage) {
+                drawFrame();
+            }
+            
+            // 重置濾鏡
+            resetFilters();
+            
+            document.getElementById('loading').style.display = 'none';
+        };
+        
+        img.src = tempCanvas.toDataURL('image/png');
+    }
+    
+    // 停止相機
+    function stopCamera() {
+        if (video && video.srcObject) {
+            const tracks = video.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+            video.srcObject = null;
+            isStreamActive = false;
+        }
     }
 });
 

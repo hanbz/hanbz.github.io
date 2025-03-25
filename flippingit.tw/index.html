@@ -38,15 +38,19 @@
     </div>
 
     <div class="upload-section">
-        <label for="file-input" class="upload-btn-container">
-            <img src="assets/pic/網站_上傳照片按鈕.png" alt="上傳圖片" class="upload-img-btn">
-        </label>
-        <input type="file" id="file-input" class="file-input" accept="image/*">
+        <div class="camera-btn-container">
+            <button id="take-photo-btn" class="camera-btn">
+                <img src="assets/pic/拍攝照片.png" alt="拍攝照片" class="camera-img-btn">
+            </button>
+            <button id="retake-photo-btn" class="camera-btn">
+                <img src="assets/pic/重新拍攝.png" alt="重新拍攝" class="camera-img-btn">
+            </button>
+        </div>
     </div>
 
     <div class="canvas-container">
         <canvas id="canvas" width="500" height="750"></canvas>
-        <div class="no-image-message" id="no-image-message">請上傳一張圖片開始編輯</div>
+        <div class="no-image-message" id="no-image-message">正在啟動相機...</div>
         <div class="loading" id="loading">
             <div class="loading-spinner"></div>
         </div>
@@ -124,6 +128,16 @@
             img[alt="調整照片"] {
                 height: 26px !important;
                 max-height: 26px !important;
+            }
+            
+            .camera-btn-container {
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+            }
+            
+            .camera-img-btn {
+                max-width: 150px;
             }
         }
     </style>

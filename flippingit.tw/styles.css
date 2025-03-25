@@ -109,6 +109,33 @@ h1 {
     background-color: var(--gradient-start);
 }
 
+.camera-btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 30px auto;
+}
+
+.camera-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.3s ease;
+}
+
+.camera-btn:hover {
+    transform: scale(1.05);
+}
+
+.camera-img-btn {
+    max-width: 190px;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
 .upload-btn-container {
     display: inline-block;
     cursor: pointer;
@@ -376,9 +403,15 @@ input[type="range"]::-webkit-slider-thumb {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: var(--text-secondary);
+    color: #0064b4;
     font-size: 18px;
     text-align: center;
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px 15px;
+    border-radius: 5px;
+    z-index: 10;
+    pointer-events: none;
 }
 
 .banner {
@@ -559,106 +592,82 @@ input[type="range"]::-webkit-slider-thumb {
 
 @media (max-width: 480px) {
     .container {
-        padding: 5px;
-        margin: 5px;
+        padding: 10px;
     }
 
     .frame-option {
-        width: calc(50% - 10px);
+        margin: 0 2px;
     }
 
     .slider-container {
-        margin: 10px 0;
+        margin-bottom: 10px;
     }
 
     .download-btn {
-        margin: 5px 0;
+        margin: 5px;
     }
 
     .banner {
-        height: calc(100vw * 960/1920);
-        max-width: none;
+        padding: 2px;
+        margin-bottom: 10px;
     }
 
     .process-section {
-        padding: 0px 0px;
+        padding: 15px 10px;
     }
 
     .process-item {
-        flex-direction: row;
-        justify-content: flex-start;
+        width: 100%;
+        margin-bottom: 15px;
     }
 
     .process-icon {
-        width: 100px;
-        height: 100px;
+        width: 50px;
+        height: 50px;
     }
 
     .process-item h3 {
-        font-size: 1.3rem;
+        font-size: 14px;
     }
 
     .process-item p {
-        font-size: 1rem;
+        font-size: 12px;
     }
 
     .canvas-container {
         width: 90%;
-        max-width: 350px;
-        aspect-ratio: 2/3;
-        max-height: none;
-        border: none;
+        margin: 10px auto;
     }
-    
-    .frame-img-btn {
-        width: 71px;
-        height: 24px;
-        margin: 0;
-        object-fit: contain;
-    }
-    
-    .upload-img-btn {
-        max-width: 200px;
+
+    .camera-btn-container {
+        gap: 5px;
         margin: 20px auto;
     }
     
-    .frames-section {
-        padding: 15px 0;
-        margin-bottom: 0px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        flex-wrap: nowrap;
+    .camera-img-btn {
+        max-width: 150px;
     }
-    
-    .frames-section .text-title {
-        margin-right: 10px;
-        margin-bottom: 0;
-        white-space: nowrap;
-        font-size: 1.5em;
+
+    .frame-img-btn {
+        width: 45px;
+        height: auto;
+        margin: 0;
     }
-    
-    .frames-container {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 5px;
-    }
-    
+
     .frame-btn {
         margin: 0;
         padding: 0;
     }
-    
+
     .text-title {
         font-size: 2em;
     }
-    
+
     .process-text {
         font-size: 11px;
         letter-spacing: 3px;
     }
-    
+
     .process-text-container {
         justify-content: center;
         padding: 10px 20px;
@@ -724,45 +733,47 @@ input[type="range"]::-webkit-slider-thumb {
 
 @media (max-width: 360px) {
     .frame-img-btn {
-        width: 71px;
-        height: 24px;
+        width: 45px;
+        height: auto;
         margin: 0;
         object-fit: contain;
     }
     
     .frames-section {
-        padding: 3px 0;
-        margin-bottom: 3px;
+        padding: 10px 0;
+        margin-bottom: 0;
         display: flex;
         flex-direction: row;
         align-items: center;
-        flex-wrap: nowrap;
     }
     
     .frames-section .text-title {
         margin-right: 5px;
-        margin-bottom: 0;
-        font-size: 1.2em;
         white-space: nowrap;
+        font-size: 1.2em;
     }
     
     .frames-container {
         display: flex;
         flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 2px;
+        gap: 5px;
     }
     
     .frame-btn {
-        margin: 0;
-        padding: 0;
+        margin: 0 2px;
+    }
+    
+    .camera-btn-container {
+        gap: 5px;
+        margin: 15px auto;
+    }
+    
+    .camera-img-btn {
+        max-width: 120px;
     }
     
     .canvas-container {
         width: 95%;
-        max-width: 280px;
-        aspect-ratio: 2/3;
-        max-height: none;
     }
     
     .upload-img-btn, .download-img-btn, .filter-img-btn {
