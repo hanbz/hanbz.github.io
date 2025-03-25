@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     let video = null;
     let isStreamActive = false;
-    let isFrontCamera = false; // 追踪當前使用的鏡頭，默認使用後置鏡頭
+    let isFrontCamera = true; // 修改為預設使用前置鏡頭
 
     // 檢查是否在移動裝置上
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -63,9 +63,9 @@ document.addEventListener('DOMContentLoaded', function () {
         switchButton.id = 'switch-camera-btn';
         switchButton.className = 'switch-camera-btn';
         
-        // 設置默認圖標（後置鏡頭時顯示前置鏡頭圖標，表示可以切換到前置）
-        switchButton.innerHTML = '<i class="fas fa-user"></i>';
-        switchButton.title = '切換到前置鏡頭';
+        // 設置默認圖標（前置鏡頭時顯示後置鏡頭圖標，表示可以切換到後置）
+        switchButton.innerHTML = '<i class="fas fa-camera"></i>';
+        switchButton.title = '切換到後置鏡頭';
         
         // 添加事件監聽器
         switchButton.addEventListener('click', switchCamera);
