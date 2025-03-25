@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 // 啟動相機
                 startCamera();
-            } else {
+                } else {
                 startCamera();
             }
         });
@@ -164,19 +164,19 @@ document.addEventListener('DOMContentLoaded', function () {
         if (frameImage) {
             // 如果有相機串流，保留視頻畫面不刪除
             if (!isStreamActive) {
-                // 填充白色背景
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // 如果有上傳圖片，先繪製圖片
-                if (currentImage) {
-                    ctx.drawImage(
-                        currentImage.element,
-                        currentImage.x,
-                        currentImage.y,
-                        currentImage.width,
-                        currentImage.height
-                    );
+            // 填充白色背景
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 如果有上傳圖片，先繪製圖片
+            if (currentImage) {
+                ctx.drawImage(
+                    currentImage.element,
+                    currentImage.x,
+                    currentImage.y,
+                    currentImage.width,
+                    currentImage.height
+                );
                 }
             }
             
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // 隱藏上傳提示訊息，除非相機正在啟動中
             if (document.getElementById('no-image-message').textContent !== '相機啟動中...' &&
                 document.getElementById('no-image-message').textContent !== '正在啟動相機...') {
-                document.getElementById('no-image-message').style.display = 'none';
+            document.getElementById('no-image-message').style.display = 'none';
             }
         }
     }
@@ -361,7 +361,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // 針對移動設備的處理方式
             if (isMobile) {
                 // 先創建一個a元素，以確保在移動設備上能正確打開
-                const link = document.createElement('a');
+        const link = document.createElement('a');
                 link.target = '_blank';
                 
                 // 使用toBlob方法轉換畫布內容
