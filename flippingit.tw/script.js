@@ -357,10 +357,19 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.target = "_blank";
-        link.click();
+        // 將畫布轉為Blob對象
+        canvas.toBlob(function(blob) {
+            // 創建URL
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // 開啟新分頁
+            window.open(blobUrl, '_blank');
+            
+            // 延遲釋放URL資源，確保新分頁已正確載入
+            setTimeout(function() {
+                URL.revokeObjectURL(blobUrl);
+            }, 1000);
+        }, 'image/png');
     }
 
     // 啟動相機
