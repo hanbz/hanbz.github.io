@@ -358,15 +358,64 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         try {
+            // 創建一個高解析度畫布
+            const highResCanvas = document.createElement('canvas');
+            highResCanvas.width = 2250;
+            highResCanvas.height = 3334;
+            const highResCtx = highResCanvas.getContext('2d');
+            
+            // 填充白色背景
+            highResCtx.fillStyle = 'white';
+            highResCtx.fillRect(0, 0, highResCanvas.width, highResCanvas.height);
+            
+            // 計算圖片在高解析度畫布中的位置和尺寸
+            let highResImageX, highResImageY, highResImageWidth, highResImageHeight;
+            
+            if (currentImage) {
+                const imageRatio = currentImage.ratio;
+                const canvasRatio = highResCanvas.width / highResCanvas.height;
+                
+                if (imageRatio > canvasRatio) {
+                    // 圖片較寬，以寬度為準
+                    highResImageWidth = highResCanvas.width * 0.9;
+                    highResImageHeight = highResImageWidth / imageRatio;
+                    highResImageX = (highResCanvas.width - highResImageWidth) / 2;
+                    highResImageY = (highResCanvas.height - highResImageHeight) / 2;
+                } else {
+                    // 圖片較高，以高度為準
+                    highResImageHeight = highResCanvas.height * 0.9;
+                    highResImageWidth = highResImageHeight * imageRatio;
+                    highResImageX = (highResCanvas.width - highResImageWidth) / 2;
+                    highResImageY = (highResCanvas.height - highResImageHeight) / 2;
+                }
+                
+                // 繪製圖片到高解析度畫布
+                highResCtx.drawImage(
+                    currentImage.element,
+                    highResImageX,
+                    highResImageY,
+                    highResImageWidth,
+                    highResImageHeight
+                );
+            }
+            
+            // 如果有相框，添加到高解析度畫布
+            if (frameImage) {
+                highResCtx.drawImage(
+                    frameImage.element,
+                    0,
+                    0,
+                    highResCanvas.width, 
+                    highResCanvas.height
+                );
+            }
+            
             // 針對移動設備的處理方式
             if (isMobile) {
-                // 先創建一個a元素，以確保在移動設備上能正確打開
-        const link = document.createElement('a');
-                link.target = '_blank';
-                
-                // 使用toBlob方法轉換畫布內容
-                canvas.toBlob(function(blob) {
-                    // 使用更長的超時時間確保移動瀏覽器有足夠時間處理
+                // 使用toBlob方法轉換高解析度畫布內容
+                highResCanvas.toBlob(function(blob) {
+                    const link = document.createElement('a');
+                    link.target = '_blank';
                     const blobUrl = URL.createObjectURL(blob);
                     link.href = blobUrl;
                     
@@ -381,22 +430,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 }, 'image/png', 1.0); // 使用最高品質設定
             } else {
                 // 桌面版本的處理方式
-                canvas.toBlob(function(blob) {
+                highResCanvas.toBlob(function(blob) {
                     const blobUrl = URL.createObjectURL(blob);
                     window.open(blobUrl, '_blank');
                     
                     setTimeout(function() {
                         URL.revokeObjectURL(blobUrl);
                     }, 1000);
-                }, 'image/png');
+                }, 'image/png', 1.0);
             }
         } catch (error) {
             // 如果有任何錯誤，使用備用方案
-            console.error('使用blob開啟照片失敗:', error);
+            console.error('使用高解析度下載失敗:', error);
             
-            // 備用方案：直接使用dataURL
-            const dataURL = canvas.toDataURL('image/png');
-            window.open(dataURL, '_blank');
+            // 先嘗試使用基本畫布
+            try {
+                const dataURL = canvas.toDataURL('image/png');
+                window.open(dataURL, '_blank');
+            } catch (fallbackError) {
+                console.error('所有下載方法都失敗:', fallbackError);
+                alert('無法下載圖片，請稍後再試。');
+            }
         }
     }
 
