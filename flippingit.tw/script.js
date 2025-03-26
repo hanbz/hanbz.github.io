@@ -123,7 +123,50 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('reset-filters').addEventListener('click', resetFilters);
 
         // 在新分頁開啟照片
-        document.getElementById('download-btn').addEventListener('click', openPhotoInNewTab);
+        document.getElementById('download-btn').addEventListener('click', function() {
+            // 將 Canvas 轉換成 Blob
+            canvas.toBlob(function(blob) {
+                // 創建 Blob URL
+                const blobUrl = URL.createObjectURL(blob);
+                
+                // 創建新頁面內容
+                const newPageContent = `
+                <!DOCTYPE html>
+                <html lang="zh-TW">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>照片相框成品</title>
+                    <style>
+                        body { 
+                            margin: 0; 
+                            display: flex; 
+                            justify-content: center; 
+                            align-items: center; 
+                            min-height: 100vh;
+                            background-color: #e6f7ff; /* 藍色背景 */
+                        }
+                        img {
+                            max-width: 100%;
+                            height: auto;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <img src="${blobUrl}" alt="照片相框成品">
+                </body>
+                </html>`;
+                
+                // 開啟新分頁
+                const newWindow = window.open();
+                newWindow.document.write(newPageContent);
+                newWindow.document.close();
+                
+                // 清理：當分頁關閉時釋放 Blob URL
+                newWindow.onunload = function() {
+                    URL.revokeObjectURL(blobUrl);
+                };
+            }, 'image/png');
+        });
     }
 
     // 修改應用相框函數
@@ -347,110 +390,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (originalImage) {
             currentImage = { ...originalImage };
             redrawCanvas();
-        }
-    }
-
-    // 在新分頁開啟照片
-    function openPhotoInNewTab() {
-        if (!currentImage) {
-            alert('請先拍攝一張照片');
-            return;
-        }
-
-        try {
-            // 創建一個高解析度畫布
-            const highResCanvas = document.createElement('canvas');
-            highResCanvas.width = 2250;
-            highResCanvas.height = 3334;
-            const highResCtx = highResCanvas.getContext('2d');
-            
-            // 填充白色背景
-            highResCtx.fillStyle = 'white';
-            highResCtx.fillRect(0, 0, highResCanvas.width, highResCanvas.height);
-            
-            // 計算圖片在高解析度畫布中的位置和尺寸
-            let highResImageX, highResImageY, highResImageWidth, highResImageHeight;
-            
-            if (currentImage) {
-                const imageRatio = currentImage.ratio;
-                const canvasRatio = highResCanvas.width / highResCanvas.height;
-                
-                if (imageRatio > canvasRatio) {
-                    // 圖片較寬，以寬度為準
-                    highResImageWidth = highResCanvas.width * 0.9;
-                    highResImageHeight = highResImageWidth / imageRatio;
-                    highResImageX = (highResCanvas.width - highResImageWidth) / 2;
-                    highResImageY = (highResCanvas.height - highResImageHeight) / 2;
-                } else {
-                    // 圖片較高，以高度為準
-                    highResImageHeight = highResCanvas.height * 0.9;
-                    highResImageWidth = highResImageHeight * imageRatio;
-                    highResImageX = (highResCanvas.width - highResImageWidth) / 2;
-                    highResImageY = (highResCanvas.height - highResImageHeight) / 2;
-                }
-                
-                // 繪製圖片到高解析度畫布
-                highResCtx.drawImage(
-                    currentImage.element,
-                    highResImageX,
-                    highResImageY,
-                    highResImageWidth,
-                    highResImageHeight
-                );
-            }
-            
-            // 如果有相框，添加到高解析度畫布
-            if (frameImage) {
-                highResCtx.drawImage(
-                    frameImage.element,
-                    0,
-                    0,
-                    highResCanvas.width, 
-                    highResCanvas.height
-                );
-            }
-            
-            // 針對移動設備的處理方式
-            if (isMobile) {
-                // 使用toBlob方法轉換高解析度畫布內容
-                highResCanvas.toBlob(function(blob) {
-                    const link = document.createElement('a');
-                    link.target = '_blank';
-                    const blobUrl = URL.createObjectURL(blob);
-                    link.href = blobUrl;
-                    
-                    // 模擬點擊事件
-                    const clickEvent = new MouseEvent('click');
-                    link.dispatchEvent(clickEvent);
-                    
-                    // 延長釋放時間，確保移動設備能夠完全加載
-                    setTimeout(function() {
-                        URL.revokeObjectURL(blobUrl);
-                    }, 3000); // 延長至3秒
-                }, 'image/png', 1.0); // 使用最高品質設定
-            } else {
-                // 桌面版本的處理方式
-                highResCanvas.toBlob(function(blob) {
-                    const blobUrl = URL.createObjectURL(blob);
-                    window.open(blobUrl, '_blank');
-                    
-                    setTimeout(function() {
-                        URL.revokeObjectURL(blobUrl);
-                    }, 1000);
-                }, 'image/png', 1.0);
-            }
-        } catch (error) {
-            // 如果有任何錯誤，使用備用方案
-            console.error('使用高解析度下載失敗:', error);
-            
-            // 先嘗試使用基本畫布
-            try {
-                const dataURL = canvas.toDataURL('image/png');
-                window.open(dataURL, '_blank');
-            } catch (fallbackError) {
-                console.error('所有下載方法都失敗:', fallbackError);
-                alert('無法下載圖片，請稍後再試。');
-            }
         }
     }
 
