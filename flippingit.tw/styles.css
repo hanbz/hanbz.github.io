@@ -208,6 +208,14 @@ h1 {
     border-radius: 5px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
     margin-bottom: 10px;
+    height: 50px;
+}
+
+.text-title-img {
+    height: 100%;
+    width: auto;
+    max-height: 50px;
+    margin-right: 9px;
 }
 
 .adjustments-section {
@@ -729,11 +737,47 @@ input[type="range"]::-webkit-slider-thumb {
     .frame-btn {
         margin: 0 2px;
     }
+
+    .frames-section {
+        flex-direction: row !important;
+        height: auto !important;
+        padding: 8px 5px !important;
+        overflow-x: auto;
+        white-space: nowrap;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    .frames-container {
+        flex-wrap: nowrap;
+        gap: 0px;
+        margin-left: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .text-title-img {
+        height: 32px !important;
+        margin-right: 8px !important;
+        align-self: center;
+        flex-shrink: 0;
+    }
+
+    .frame-img-btn {
+        width: 75px !important;
+        height: auto !important;
+        margin: 0 !important;
+    }
+
+    .frame-btn {
+        margin: 0 2px;
+        flex-shrink: 0;
+    }
 }
 
 @media (max-width: 360px) {
     .frame-img-btn {
-        width: 45px;
+        width: 65px !important;
         height: auto;
         margin: 0;
         object-fit: contain;
@@ -745,6 +789,7 @@ input[type="range"]::-webkit-slider-thumb {
         display: flex;
         flex-direction: row;
         align-items: center;
+        justify-content: center;
     }
     
     .frames-section .text-title {
