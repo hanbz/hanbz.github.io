@@ -46,16 +46,27 @@ document.addEventListener('DOMContentLoaded', function () {
     function resizeCanvas() {
         const container = document.querySelector('.canvas-container');
         
+        // 獲取設備像素比
+        const dpr = window.devicePixelRatio || 1;
+        
         // 根據容器寬度和2:3的比例計算畫布大小
         const containerWidth = container.clientWidth;
         const containerHeight = container.clientHeight;
         
-        canvas.width = containerWidth;
-        canvas.height = containerHeight;
+        // 設置畫布的顯示大小
+        canvas.style.width = containerWidth + 'px';
+        canvas.style.height = containerHeight + 'px';
+        
+        // 設置畫布的實際大小，考慮設備像素比
+        canvas.width = Math.floor(containerWidth * dpr);
+        canvas.height = Math.floor(containerHeight * dpr);
+        
+        // 調整繪圖上下文以匹配設備像素比
+        ctx.scale(dpr, dpr);
 
         // 設置白色背景
         ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, containerWidth, containerHeight);
 
         // 重新繪製
         redrawCanvas();
@@ -204,19 +215,19 @@ document.addEventListener('DOMContentLoaded', function () {
         if (frameImage) {
             // 如果有相機串流，保留視頻畫面不刪除
             if (!isStreamActive) {
-            // 填充白色背景
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // 如果有上傳圖片，先繪製圖片
-            if (currentImage) {
-                ctx.drawImage(
-                    currentImage.element,
-                    currentImage.x,
-                    currentImage.y,
-                    currentImage.width,
-                    currentImage.height
-                );
+                // 填充白色背景
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
+                
+                // 如果有上傳圖片，先繪製圖片
+                if (currentImage) {
+                    ctx.drawImage(
+                        currentImage.element,
+                        currentImage.x,
+                        currentImage.y,
+                        currentImage.width,
+                        currentImage.height
+                    );
                 }
             }
             
@@ -225,14 +236,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 frameImage.element,
                 0,
                 0,
-                canvas.width,
-                canvas.height
+                canvas.width / (window.devicePixelRatio || 1),
+                canvas.height / (window.devicePixelRatio || 1)
             );
             
             // 隱藏上傳提示訊息，除非相機正在啟動中
             if (document.getElementById('no-image-message').textContent !== '相機啟動中...' &&
                 document.getElementById('no-image-message').textContent !== '正在啟動相機...') {
-            document.getElementById('no-image-message').style.display = 'none';
+                document.getElementById('no-image-message').style.display = 'none';
             }
         }
     }
@@ -443,40 +454,39 @@ document.addEventListener('DOMContentLoaded', function () {
     function drawVideoPreview() {
         if (!video || !isStreamActive) return;
         
+        const dpr = window.devicePixelRatio || 1;
+        
         // 清除畫布
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
         
         // 獲取視頻尺寸
         const videoWidth = video.videoWidth;
         const videoHeight = video.videoHeight;
         
         if (videoWidth === 0 || videoHeight === 0) {
-            // 視頻尺寸未就緒，等待下一幀
             requestAnimationFrame(drawVideoPreview);
             return;
         }
         
         // 計算視頻和畫布的長寬比
         const videoRatio = videoWidth / videoHeight;
-        const canvasRatio = canvas.width / canvas.height;
+        const canvasRatio = (canvas.width / dpr) / (canvas.height / dpr);
         
         let x, y, width, height;
         
         // 根據視頻長寬比決定如何填充畫布
         if (videoRatio > canvasRatio) {
-            // 視頻較寬，以寬度為準
-            width = canvas.width * 0.9;
+            width = (canvas.width / dpr) * 0.9;
             height = width / videoRatio;
-            x = (canvas.width - width) / 2;
-            y = (canvas.height - height) / 2;
+            x = ((canvas.width / dpr) - width) / 2;
+            y = ((canvas.height / dpr) - height) / 2;
         } else {
-            // 視頻較高，以高度為準
-            height = canvas.height * 0.9;
+            height = (canvas.height / dpr) * 0.9;
             width = height * videoRatio;
-            x = (canvas.width - width) / 2;
-            y = (canvas.height - height) / 2;
+            x = ((canvas.width / dpr) - width) / 2;
+            y = ((canvas.height / dpr) - height) / 2;
         }
         
         // 繪製視頻
@@ -487,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function () {
             drawFrame();
         }
         
-        // 繼續繪製預覽（動畫）
+        // 繼續繪製預覽
         if (isStreamActive) {
             requestAnimationFrame(drawVideoPreview);
         }
@@ -501,6 +511,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         document.getElementById('loading').style.display = 'flex';
+        
+        const dpr = window.devicePixelRatio || 1;
         
         // 創建一個臨時畫布來捕獲整個視頻幀，保持原始尺寸
         const tempCanvas = document.createElement('canvas');
@@ -520,23 +532,21 @@ document.addEventListener('DOMContentLoaded', function () {
         img.onload = function() {
             // 計算圖片在主畫布上的位置和尺寸
             const imageRatio = videoWidth / videoHeight;
-            const canvasRatio = canvas.width / canvas.height;
+            const canvasRatio = (canvas.width / dpr) / (canvas.height / dpr);
             
             let x, y, width, height;
             
             // 根據圖片長寬比決定如何填充畫布
             if (imageRatio > canvasRatio) {
-                // 圖片較寬，以寬度為準
-                width = canvas.width * 0.9;
+                width = (canvas.width / dpr) * 0.9;
                 height = width / imageRatio;
-                x = (canvas.width - width) / 2;
-                y = (canvas.height - height) / 2;
+                x = ((canvas.width / dpr) - width) / 2;
+                y = ((canvas.height / dpr) - height) / 2;
             } else {
-                // 圖片較高，以高度為準
-                height = canvas.height * 0.9;
+                height = (canvas.height / dpr) * 0.9;
                 width = height * imageRatio;
-                x = (canvas.width - width) / 2;
-                y = (canvas.height - height) / 2;
+                x = ((canvas.width / dpr) - width) / 2;
+                y = ((canvas.height / dpr) - height) / 2;
             }
             
             // 保存原始圖片和當前圖片的數據
@@ -559,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // 清除畫布
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
             
             // 繪製圖片
             ctx.drawImage(img, x, y, width, height);
