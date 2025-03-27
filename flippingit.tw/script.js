@@ -124,12 +124,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // 在新分頁開啟照片
         document.getElementById('download-btn').addEventListener('click', function() {
+            // 先打開一個空白頁面
+            const newWindow = window.open('', '_blank');
+            
             // 將 Canvas 轉換成 Blob
             canvas.toBlob(function(blob) {
                 // 創建 Blob URL
                 const blobUrl = URL.createObjectURL(blob);
                 
-                // 創建新頁面內容
+                // 在新頁面中設置內容
                 const newPageContent = `
                 <!DOCTYPE html>
                 <html lang="zh-TW">
@@ -156,16 +159,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 </body>
                 </html>`;
                 
-                // 開啟新分頁
-                const newWindow = window.open();
+                // 將內容寫入新頁面
                 newWindow.document.write(newPageContent);
-                newWindow.document.close();
-                
-                // 清理：當分頁關閉時釋放 Blob URL
-                newWindow.onunload = function() {
-                    URL.revokeObjectURL(blobUrl);
-                };
-            }, 'image/png');
+                newWindow.document.close(); // 完成寫入
+            });
         });
     }
 
