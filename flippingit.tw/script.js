@@ -150,14 +150,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 <head>
                     <meta charset="UTF-8">
                     <title>照片相框成品</title>
+                    <link rel="preconnect" href="https://fonts.googleapis.com">
+                    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500&display=swap" rel="stylesheet">
                     <style>
                         body { 
                             margin: 0; 
                             display: flex; 
+                            flex-direction: column;
                             justify-content: center; 
                             align-items: center; 
                             min-height: 100vh;
                             background-color: #e6f7ff; /* 藍色背景 */
+                            font-family: 'Noto Sans TC', sans-serif;
+                        }
+                        .reminder {
+                            margin-bottom: 20px;
+                            font-size: 20px;
+                            font-weight: 500;
+                            color: #002368;
                         }
                         img {
                             max-width: 100%;
@@ -166,6 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     </style>
                 </head>
                 <body>
+                    <div class="reminder">記得截圖或儲存照片喔！</div>
                     <img src="${blobUrl}" alt="照片相框成品">
                 </body>
                 </html>`;
