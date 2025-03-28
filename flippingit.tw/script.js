@@ -469,12 +469,16 @@ document.addEventListener('DOMContentLoaded', function () {
             video.srcObject = stream;
             isStreamActive = true;
             
-            // 等待視頻元數據加載完成
+            // 為 iPhone Safari 添加額外確認
             video.onloadedmetadata = function() {
-                // 隱藏提示信息
                 document.getElementById('no-image-message').style.display = 'none';
-                // 顯示視頻預覽
-                drawVideoPreview();
+                
+                // 強制等待並多次嘗試繪製，確保視頻尺寸正確獲取
+                setTimeout(function() {
+                    drawVideoPreview();
+                    // 200ms 後再次嘗試繪製，確保尺寸已正確獲取
+                    setTimeout(drawVideoPreview, 200);
+                }, 100);
             };
             
             // 當視頻可以播放時，確保繪製預覽
@@ -545,28 +549,23 @@ document.addEventListener('DOMContentLoaded', function () {
         const videoHeight = video.videoHeight;
         
         if (videoWidth === 0 || videoHeight === 0) {
-            requestAnimationFrame(drawVideoPreview);
+            // 在 Safari 上可能需要更多時間加載視頻
+            setTimeout(() => requestAnimationFrame(drawVideoPreview), 100);
             return;
         }
         
         // 計算視頻和畫布的長寬比
         const videoRatio = videoWidth / videoHeight;
-        const canvasRatio = canvasWidth / canvasHeight;
         
-        let x, y, width, height;
+        // 在 iPhone Safari 上確保寬度滿版
+        let x = 0, y, width, height;
         
-        // 計算尺寸以保持寬度100%
+        // 修改: 強制保持寬度為 100% 畫布寬度
         width = canvasWidth;
         height = width / videoRatio;
-        x = 0; // 左右完全貼齊
         
-        // 若高度超出畫布，則置中並裁切上下部分
-        if (height > canvasHeight) {
-            y = (canvasHeight - height) / 2; // 垂直置中，上下會被裁切
-        } else {
-            // 若高度小於畫布，則垂直置中顯示
-            y = (canvasHeight - height) / 2;
-        }
+        // 計算垂直位置，確保居中
+        y = (canvasHeight - height) / 2;
         
         // 繪製視頻 - 前置相機需要水平翻轉
         if (isFrontCamera) {
