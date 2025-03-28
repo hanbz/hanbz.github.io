@@ -488,16 +488,17 @@ document.addEventListener('DOMContentLoaded', function () {
         
         let x, y, width, height;
         
-        // 根據視頻長寬比決定如何填充畫布
-        if (videoRatio > canvasRatio) {
-            width = (canvas.width / dpr) * 0.9;
-            height = width / videoRatio;
-            x = ((canvas.width / dpr) - width) / 2;
-            y = ((canvas.height / dpr) - height) / 2;
+        // 修改：左右貼齊相框，按照原始比例縮放，裁切上下超出部分
+        // 將寬度設置為100%畫布寬度，高度根據視頻比例計算
+        width = canvas.width / dpr;
+        height = width / videoRatio;
+        x = 0; // 左右完全貼齊
+        
+        // 若高度超出畫布，則置中並裁切上下部分
+        if (height > canvas.height / dpr) {
+            y = ((canvas.height / dpr) - height) / 2; // 垂直置中，上下會被裁切
         } else {
-            height = (canvas.height / dpr) * 0.9;
-            width = height * videoRatio;
-            x = ((canvas.width / dpr) - width) / 2;
+            // 若高度小於畫布，則垂直置中顯示
             y = ((canvas.height / dpr) - height) / 2;
         }
         
@@ -548,16 +549,17 @@ document.addEventListener('DOMContentLoaded', function () {
             
             let x, y, width, height;
             
-            // 根據圖片長寬比決定如何填充畫布
-            if (imageRatio > canvasRatio) {
-                width = (canvas.width / dpr) * 0.9;
-                height = width / imageRatio;
-                x = ((canvas.width / dpr) - width) / 2;
-                y = ((canvas.height / dpr) - height) / 2;
+            // 修改：左右貼齊相框，按照原始比例縮放，裁切上下超出部分
+            // 將寬度設置為100%畫布寬度，高度根據視頻比例計算
+            width = canvas.width / dpr;
+            height = width / imageRatio;
+            x = 0; // 左右完全貼齊
+            
+            // 若高度超出畫布，則置中並裁切上下部分
+            if (height > canvas.height / dpr) {
+                y = ((canvas.height / dpr) - height) / 2; // 垂直置中，上下會被裁切
             } else {
-                height = (canvas.height / dpr) * 0.9;
-                width = height * imageRatio;
-                x = ((canvas.width / dpr) - width) / 2;
+                // 若高度小於畫布，則垂直置中顯示
                 y = ((canvas.height / dpr) - height) / 2;
             }
             
