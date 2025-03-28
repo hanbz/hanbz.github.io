@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                         .reminder {
                             margin-bottom: 20px;
-                            font-size: 20px;
+                            font-size: 50px;
                             font-weight: 500;
                             color: #002368;
                         }
