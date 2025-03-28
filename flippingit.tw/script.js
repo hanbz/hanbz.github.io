@@ -53,7 +53,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const containerWidth = container.clientWidth;
         const containerHeight = container.clientHeight;
         
-        // 設置畫布的顯示大小
+        // 判斷是否為桌面版本（非移動設備）
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // 設置畫布的顯示大小 - 保持與容器相同大小
         canvas.style.width = containerWidth + 'px';
         canvas.style.height = containerHeight + 'px';
         
@@ -238,6 +241,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!isStreamActive) {
                 // 如果有上傳圖片，先繪製圖片
                 if (currentImage) {
+                    // 使用當前圖片的位置和尺寸繪製
                     ctx.drawImage(
                         currentImage.element,
                         currentImage.x,
@@ -290,22 +294,33 @@ document.addEventListener('DOMContentLoaded', function () {
         if (currentImage) {
             // 重新計算圖片在畫布上的位置和尺寸
             const imageRatio = currentImage.ratio;
-            const canvasRatio = canvasWidth / canvasHeight;
             
             let x, y, width, height;
             
-            // 使用與 drawVideoPreview 和 capturePhoto 相同的計算邏輯
-            // 將寬度設置為100%畫布寬度，高度根據圖片比例計算
-            width = canvasWidth;
-            height = width / imageRatio;
-            x = 0; // 左右完全貼齊
+            // 判斷是否為桌面版本（非移動設備）
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            // 若高度超出畫布，則置中並裁切上下部分
-            if (height > canvasHeight) {
-                y = (canvasHeight - height) / 2; // 垂直置中，上下會被裁切
-            } else {
-                // 若高度小於畫布，則垂直置中顯示
+            // 圖片的尺寸和位置計算
+            if (!isMobileDevice) {
+                // 桌面版本：圖片寬度設為畫布寬度，保持圖片比例
+                width = canvasWidth;
+                height = width / imageRatio;
+                
+                // 若高度超出畫布，則調整以適應高度
+                if (height > canvasHeight) {
+                    height = canvasHeight;
+                    width = height * imageRatio;
+                }
+                
+                // 確保圖片居中
+                x = (canvasWidth - width) / 2;
                 y = (canvasHeight - height) / 2;
+            } else {
+                // 移動版本：圖片寬度設為畫布寬度，垂直居中
+                width = canvasWidth;
+                height = width / imageRatio;
+                x = 0;  // 貼齊左側
+                y = (canvasHeight - height) / 2;  // 垂直居中
             }
             
             // 更新當前圖片的位置和尺寸
@@ -557,15 +572,33 @@ document.addEventListener('DOMContentLoaded', function () {
         // 計算視頻和畫布的長寬比
         const videoRatio = videoWidth / videoHeight;
         
-        // 在 iPhone Safari 上確保寬度滿版
-        let x = 0, y, width, height;
+        // 判斷是否為桌面版本（非移動設備）
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // 修改: 強制保持寬度為 100% 畫布寬度
-        width = canvasWidth;
-        height = width / videoRatio;
+        // 計算視頻在畫布上的位置和尺寸
+        let x, y, width, height;
         
-        // 計算垂直位置，確保居中
-        y = (canvasHeight - height) / 2;
+        if (!isMobileDevice) {
+            // 桌面版本：視頻寬度設為畫布寬度，保持視頻比例
+            width = canvasWidth;
+            height = width / videoRatio;
+            
+            // 若高度超出畫布，則調整以適應高度
+            if (height > canvasHeight) {
+                height = canvasHeight;
+                width = height * videoRatio;
+            }
+            
+            // 確保視頻居中
+            x = (canvasWidth - width) / 2;
+            y = (canvasHeight - height) / 2;
+        } else {
+            // 移動版本：視頻寬度設為畫布寬度，垂直居中
+            width = canvasWidth;
+            height = width / videoRatio;
+            x = 0;  // 貼齊左側
+            y = (canvasHeight - height) / 2;  // 垂直居中
+        }
         
         // 繪製視頻 - 前置相機需要水平翻轉
         if (isFrontCamera) {
@@ -629,22 +662,32 @@ document.addEventListener('DOMContentLoaded', function () {
             const imageRatio = videoWidth / videoHeight;
             const canvasWidth = canvas.width / dpr;
             const canvasHeight = canvas.height / dpr;
-            const canvasRatio = canvasWidth / canvasHeight;
+            
+            // 判斷是否為桌面版本（非移動設備）
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
             let x, y, width, height;
             
-            // 確保與 drawVideoPreview 使用相同的計算方式
-            // 將寬度設置為100%畫布寬度，高度根據視頻比例計算
-            width = canvasWidth;
-            height = width / imageRatio;
-            x = 0; // 左右完全貼齊
-            
-            // 若高度超出畫布，則置中並裁切上下部分
-            if (height > canvasHeight) {
-                y = (canvasHeight - height) / 2; // 垂直置中，上下會被裁切
-            } else {
-                // 若高度小於畫布，則垂直置中顯示
+            if (!isMobileDevice) {
+                // 桌面版本：圖片寬度設為畫布寬度，保持圖片比例
+                width = canvasWidth;
+                height = width / imageRatio;
+                
+                // 若高度超出畫布，則調整以適應高度
+                if (height > canvasHeight) {
+                    height = canvasHeight;
+                    width = height * imageRatio;
+                }
+                
+                // 確保圖片居中
+                x = (canvasWidth - width) / 2;
                 y = (canvasHeight - height) / 2;
+            } else {
+                // 移動版本：圖片寬度設為畫布寬度，垂直居中
+                width = canvasWidth;
+                height = width / imageRatio;
+                x = 0;  // 貼齊左側
+                y = (canvasHeight - height) / 2;  // 垂直居中
             }
             
             // 保存原始圖片和當前圖片的數據
