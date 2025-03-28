@@ -61,6 +61,9 @@ document.addEventListener('DOMContentLoaded', function () {
         canvas.width = Math.floor(containerWidth * dpr);
         canvas.height = Math.floor(containerHeight * dpr);
         
+        // 重要：每次重設畫布大小時，先重置繪圖上下文
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        
         // 調整繪圖上下文以匹配設備像素比
         ctx.scale(dpr, dpr);
 
@@ -198,25 +201,27 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.classList.remove('selected');
         });
         
-        // 設置當前選中的相框按鈕
+        // 選中當前相框按鈕
         document.querySelector(`.frame-btn[data-frame="${frameSrc}"]`).classList.add('selected');
-
+        
         // 載入相框圖片
         const img = new Image();
-        img.onload = function () {
+        img.onload = function() {
             frameImage = {
                 element: img,
                 src: frameSrc
             };
             
+            // 重新繪製畫布
             drawFrame();
+            
             document.getElementById('loading').style.display = 'none';
         };
         
-        img.onerror = function () {
-            console.error("Error loading frame image");
+        img.onerror = function() {
+            console.error('載入相框圖片失敗：', frameSrc);
+            alert('載入相框圖片失敗，請重試或選擇其他相框');
             document.getElementById('loading').style.display = 'none';
-            alert('載入相框時發生錯誤');
         };
         
         img.src = frameSrc;
@@ -225,12 +230,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // 繪製相框
     function drawFrame() {
         if (frameImage) {
+            const dpr = window.devicePixelRatio || 1;
+            const canvasWidth = canvas.width / dpr;
+            const canvasHeight = canvas.height / dpr;
+            
             // 如果有相機串流，保留視頻畫面不刪除
             if (!isStreamActive) {
-                // 填充白色背景
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
-                
                 // 如果有上傳圖片，先繪製圖片
                 if (currentImage) {
                     ctx.drawImage(
@@ -240,6 +245,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         currentImage.width,
                         currentImage.height
                     );
+                } else {
+                    // 填充白色背景
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
                 }
             }
             
@@ -248,8 +257,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 frameImage.element,
                 0,
                 0,
-                canvas.width / (window.devicePixelRatio || 1),
-                canvas.height / (window.devicePixelRatio || 1)
+                canvasWidth,
+                canvasHeight
             );
             
             // 隱藏上傳提示訊息，除非相機正在啟動中
@@ -264,34 +273,39 @@ document.addEventListener('DOMContentLoaded', function () {
     function redrawCanvas() {
         if (!canvas || !ctx) return;
         
+        const dpr = window.devicePixelRatio || 1;
+        
         // 清除畫布
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
+        // 獲取畫布實際的顯示尺寸
+        const canvasWidth = canvas.width / dpr;
+        const canvasHeight = canvas.height / dpr;
+        
         // 填充白色背景
         ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
         // 繪製當前圖片（如果有）
         if (currentImage) {
             // 重新計算圖片在畫布上的位置和尺寸
             const imageRatio = currentImage.ratio;
-            const canvasRatio = canvas.width / canvas.height;
+            const canvasRatio = canvasWidth / canvasHeight;
             
             let x, y, width, height;
             
-            // 根據圖片長寬比決定如何填充畫布
-            if (imageRatio > canvasRatio) {
-                // 圖片較寬，以寬度為準
-                width = canvas.width * 0.9;
-                height = width / imageRatio;
-                x = (canvas.width - width) / 2;
-                y = (canvas.height - height) / 2;
+            // 使用與 drawVideoPreview 和 capturePhoto 相同的計算邏輯
+            // 將寬度設置為100%畫布寬度，高度根據圖片比例計算
+            width = canvasWidth;
+            height = width / imageRatio;
+            x = 0; // 左右完全貼齊
+            
+            // 若高度超出畫布，則置中並裁切上下部分
+            if (height > canvasHeight) {
+                y = (canvasHeight - height) / 2; // 垂直置中，上下會被裁切
             } else {
-                // 圖片較高，以高度為準
-                height = canvas.height * 0.9;
-                width = height * imageRatio;
-                x = (canvas.width - width) / 2;
-                y = (canvas.height - height) / 2;
+                // 若高度小於畫布，則垂直置中顯示
+                y = (canvasHeight - height) / 2;
             }
             
             // 更新當前圖片的位置和尺寸
@@ -315,8 +329,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     frameImage.element,
                     0,
                     0,
-                    canvas.width,
-                    canvas.height
+                    canvasWidth,
+                    canvasHeight
                 );
             }
         } else if (isStreamActive && video) {
@@ -426,19 +440,31 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!video) {
             video = document.createElement('video');
             video.autoplay = true;
+            video.playsInline = true; // 在 iOS 上允許內聯播放
             video.style.display = 'none';
             document.body.appendChild(video);
         }
         
-        // 請求攝像頭權限，根據當前的鏡頭狀態選擇前置或後置鏡頭
-        navigator.mediaDevices.getUserMedia({
+        // 根據設備選擇適合的相機設置
+        let constraints = {
             video: {
-                facingMode: isFrontCamera ? 'user' : 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
+                facingMode: isFrontCamera ? 'user' : 'environment'
             },
             audio: false
-        })
+        };
+        
+        // 在高端設備上嘗試使用更高的分辨率
+        if (!isMobile) {
+            constraints.video.width = { ideal: 1920 };
+            constraints.video.height = { ideal: 1080 };
+        } else {
+            // 在移動設備上使用較低的分辨率但保持較高的幀率
+            constraints.video.width = { ideal: 1280 };
+            constraints.video.height = { ideal: 720 };
+        }
+        
+        // 請求攝像頭權限
+        navigator.mediaDevices.getUserMedia(constraints)
         .then(function(stream) {
             video.srcObject = stream;
             isStreamActive = true;
@@ -451,15 +477,51 @@ document.addEventListener('DOMContentLoaded', function () {
                 drawVideoPreview();
             };
             
+            // 當視頻可以播放時，確保繪製預覽
+            video.oncanplay = function() {
+                if (isStreamActive) {
+                    drawVideoPreview();
+                }
+            };
+            
             document.getElementById('loading').style.display = 'none';
         })
         .catch(function(error) {
             console.error("無法啟動相機: ", error);
+            
+            // 如果前置相機失敗，嘗試後置相機
+            if (isFrontCamera) {
+                isFrontCamera = false;
+                constraints.video.facingMode = 'environment';
+                
+                navigator.mediaDevices.getUserMedia(constraints)
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    isStreamActive = true;
+                    
+                    video.onloadedmetadata = function() {
+                        document.getElementById('no-image-message').style.display = 'none';
+                        drawVideoPreview();
+                    };
+                    
+                    document.getElementById('loading').style.display = 'none';
+                })
+                .catch(function(secondError) {
+                    handleCameraError(secondError);
+                });
+            } else {
+                handleCameraError(error);
+            }
+        });
+        
+        // 處理相機錯誤的函數
+        function handleCameraError(error) {
+            console.error("無法啟動任何相機: ", error);
             document.getElementById('loading').style.display = 'none';
             document.getElementById('no-image-message').style.display = 'flex';
             document.getElementById('no-image-message').textContent = '無法啟動相機，請檢查相機權限';
-            alert('無法啟動相機，請檢查相機權限。');
-        });
+            alert('無法啟動相機，請檢查相機權限或嘗試使用其他瀏覽器。');
+        }
     }
     
     // 在畫布上繪製視頻預覽
@@ -470,8 +532,13 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // 清除畫布
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 獲取畫布實際的顯示尺寸
+        const canvasWidth = canvas.width / dpr;
+        const canvasHeight = canvas.height / dpr;
+        
         ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
         // 獲取視頻尺寸
         const videoWidth = video.videoWidth;
@@ -484,26 +551,37 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // 計算視頻和畫布的長寬比
         const videoRatio = videoWidth / videoHeight;
-        const canvasRatio = (canvas.width / dpr) / (canvas.height / dpr);
+        const canvasRatio = canvasWidth / canvasHeight;
         
         let x, y, width, height;
         
-        // 修改：左右貼齊相框，按照原始比例縮放，裁切上下超出部分
-        // 將寬度設置為100%畫布寬度，高度根據視頻比例計算
-        width = canvas.width / dpr;
+        // 計算尺寸以保持寬度100%
+        width = canvasWidth;
         height = width / videoRatio;
         x = 0; // 左右完全貼齊
         
         // 若高度超出畫布，則置中並裁切上下部分
-        if (height > canvas.height / dpr) {
-            y = ((canvas.height / dpr) - height) / 2; // 垂直置中，上下會被裁切
+        if (height > canvasHeight) {
+            y = (canvasHeight - height) / 2; // 垂直置中，上下會被裁切
         } else {
             // 若高度小於畫布，則垂直置中顯示
-            y = ((canvas.height / dpr) - height) / 2;
+            y = (canvasHeight - height) / 2;
         }
         
-        // 繪製視頻
-        ctx.drawImage(video, x, y, width, height);
+        // 繪製視頻 - 前置相機需要水平翻轉
+        if (isFrontCamera) {
+            // 保存當前繪圖狀態
+            ctx.save();
+            // 水平翻轉處理
+            ctx.translate(x + width, y);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, width, height);
+            // 恢復繪圖狀態
+            ctx.restore();
+        } else {
+            // 後置相機直接繪製
+            ctx.drawImage(video, x, y, width, height);
+        }
         
         // 如果有相框，重新應用
         if (frameImage) {
@@ -538,6 +616,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const tempCtx = tempCanvas.getContext('2d');
         
         // 將視頻幀繪製到臨時畫布上（保持原始尺寸）
+        if (isFrontCamera) {
+            // 前置鏡頭需要水平翻轉
+            tempCtx.translate(videoWidth, 0);
+            tempCtx.scale(-1, 1);
+        }
         tempCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
         
         // 將臨時畫布內容轉換為圖片
@@ -545,22 +628,24 @@ document.addEventListener('DOMContentLoaded', function () {
         img.onload = function() {
             // 計算圖片在主畫布上的位置和尺寸
             const imageRatio = videoWidth / videoHeight;
-            const canvasRatio = (canvas.width / dpr) / (canvas.height / dpr);
+            const canvasWidth = canvas.width / dpr;
+            const canvasHeight = canvas.height / dpr;
+            const canvasRatio = canvasWidth / canvasHeight;
             
             let x, y, width, height;
             
-            // 修改：左右貼齊相框，按照原始比例縮放，裁切上下超出部分
+            // 確保與 drawVideoPreview 使用相同的計算方式
             // 將寬度設置為100%畫布寬度，高度根據視頻比例計算
-            width = canvas.width / dpr;
+            width = canvasWidth;
             height = width / imageRatio;
             x = 0; // 左右完全貼齊
             
             // 若高度超出畫布，則置中並裁切上下部分
-            if (height > canvas.height / dpr) {
-                y = ((canvas.height / dpr) - height) / 2; // 垂直置中，上下會被裁切
+            if (height > canvasHeight) {
+                y = (canvasHeight - height) / 2; // 垂直置中，上下會被裁切
             } else {
                 // 若高度小於畫布，則垂直置中顯示
-                y = ((canvas.height / dpr) - height) / 2;
+                y = (canvasHeight - height) / 2;
             }
             
             // 保存原始圖片和當前圖片的數據
@@ -583,7 +668,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // 清除畫布
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
             
             // 繪製圖片
             ctx.drawImage(img, x, y, width, height);
