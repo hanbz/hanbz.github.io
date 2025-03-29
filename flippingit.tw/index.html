@@ -4,6 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>照片相框應用</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -34,16 +40,19 @@
     <div class="banner">
     </div>
     <div class="banner-pic">
-        <img src="assets/pic/流程說明.svg" alt="流程說明" style="width: 100%; height: auto;">
+        <img src="assets/pic/流程說明.svg" alt="流程說明" width="1200" preserveAspectRatio="xMidYMid meet"
+            style="width: 100%; height: auto;">
     </div>
 
     <div class="upload-section">
         <div class="camera-btn-container">
             <button id="take-photo-btn" class="camera-btn">
-                <img src="assets/pic/拍攝照片.svg" alt="拍攝照片" class="camera-img-btn">
+                <img src="assets/pic/拍攝照片.svg" alt="拍攝照片" width="300" preserveAspectRatio="xMidYMid meet"
+                    class="camera-img-btn">
             </button>
             <button id="retake-photo-btn" class="camera-btn">
-                <img src="assets/pic/重新拍攝.svg" alt="重新拍攝" class="camera-img-btn">
+                <img src="assets/pic/重新拍攝.svg" alt="重新拍攝" width="300" preserveAspectRatio="xMidYMid meet"
+                    class="camera-img-btn">
             </button>
         </div>
     </div>
@@ -58,7 +67,8 @@
 
 
     <div class="frames-section">
-        <img src="assets/pic/選擇相框.svg" alt="選擇相框" class="text-title-img">
+        <img src="assets/pic/選擇相框.svg" alt="選擇相框" width="200" preserveAspectRatio="xMidYMid meet"
+            class="text-title-img">
         <div class="frames-container" id="frames-container">
             <button class="frame-btn selected" data-frame="./assets/frames/網站_相框01.png">
                 <img src="assets/pic/網站_相框1按鈕.png" alt="相框1" class="frame-img-btn">
@@ -69,9 +79,9 @@
         </div>
     </div>
 
-    <img src="assets/pic/網站_分隔蠟筆線條 2.svg" alt="" class="line">
+    <img src="assets/pic/網站_分隔蠟筆線條 2.svg" alt="" width="800" preserveAspectRatio="xMidYMid meet" class="line">
     <div class="adjustments-section">
-        <img src="assets/pic/調整照片.svg" alt="調整照片"
+        <img src="assets/pic/調整照片.svg" alt="調整照片" width="200" preserveAspectRatio="xMidYMid meet"
             style="height: 50px; width: auto; max-height: 50px; display: block; margin: 10px auto 25px auto;">
         <div class="slider-wrapper">
             <div class="slider-container">
@@ -98,13 +108,15 @@
     <div class="download-section">
         <div class="button-container">
             <button class="download-btn" id="download-btn">
-                <img src="assets/pic/下載成品.svg" alt="下載圖片" class="download-img-btn">
+                <img src="assets/pic/下載成品.svg" alt="下載圖片" width="360" preserveAspectRatio="xMidYMid meet"
+                    class="download-img-btn">
             </button>
-            <a href="https://www.surveycake.com/s/860ra" target="_blank">
-                <button class="download-btn" id="submit-btn">
-                    <img src="assets/pic/提交照片.svg" alt="提交照片" class="download-img-btn">
-                </button>
-            </a>
+
+            <button class="download-btn" id="submit-btn"><a href="https://www.surveycake.com/s/860ra" target="_blank">
+                    <img src="assets/pic/提交照片.svg" alt="提交照片" width="360" preserveAspectRatio="xMidYMid meet"
+                        class="download-img-btn">
+                </a></button>
+
         </div>
     </div>
 
@@ -122,12 +134,12 @@
             .frames-section {
                 height: 26px !important;
             }
-            
+
             img[alt="調整照片"] {
                 height: 26px !important;
                 max-height: 26px !important;
             }
-            
+
             .camera-btn-container {
                 display: flex;
                 justify-content: center;
