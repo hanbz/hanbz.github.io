@@ -121,20 +121,20 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('brightness').addEventListener('input', function () {
             document.getElementById('brightness-value').textContent = this.value;
             filterValues.brightness = parseInt(this.value);
+            applyFilters(); // 自動應用調整
         });
 
         document.getElementById('contrast').addEventListener('input', function () {
             document.getElementById('contrast-value').textContent = this.value;
             filterValues.contrast = parseInt(this.value);
+            applyFilters(); // 自動應用調整
         });
 
         document.getElementById('saturation').addEventListener('input', function () {
             document.getElementById('saturation-value').textContent = this.value;
             filterValues.saturation = parseInt(this.value);
+            applyFilters(); // 自動應用調整
         });
-
-        // 套用濾鏡
-        document.getElementById('apply-filters').addEventListener('click', applyFilters);
 
         // 重置濾鏡
         document.getElementById('reset-filters').addEventListener('click', resetFilters);
