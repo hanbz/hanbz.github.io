@@ -153,10 +153,25 @@ document.addEventListener('DOMContentLoaded', function () {
                             max-width: 100%;
                             height: auto;
                         }
+                        .submit-btn {
+                            display: block;
+                            margin-bottom: 30px;
+                            text-decoration: none;
+                        }
+                        .submit-btn img {
+                            max-width: 300px;
+                            transition: transform 0.3s ease;
+                        }
+                        .submit-btn:hover img {
+                            transform: scale(1.05);
+                        }
                     </style>
                 </head>
                 <body>
                     <div class="reminder">記得截圖或儲存照片喔！</div>
+                    <a href="https://www.surveycake.com/s/860ra" target="_blank" class="submit-btn">
+                        <img src="./assets/pic/提交照片.png" alt="提交照片">
+                    </a>
                     <img src="${blobUrl}" alt="照片相框成品">
                 </body>
                 </html>`;
