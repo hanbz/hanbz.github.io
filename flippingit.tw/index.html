@@ -79,32 +79,6 @@
         </div>
     </div>
 
-    <img src="assets/pic/分隔線.png" alt="" width="800" preserveAspectRatio="xMidYMid meet" class="line">
-    <div class="adjustments-section">
-        <img src="assets/pic/調整照片.png" alt="調整照片" width="200" preserveAspectRatio="xMidYMid meet"
-            style="height: 50px; width: auto; max-height: 50px; display: block; margin: 10px auto 25px auto;">
-        <div class="slider-wrapper">
-            <div class="slider-container">
-                <label for="brightness">亮度: <span id="brightness-value">0</span></label>
-                <input type="range" id="brightness" min="-100" max="100" value="0">
-            </div>
-            <div class="slider-container">
-                <label for="contrast">對比度: <span id="contrast-value">0</span></label>
-                <input type="range" id="contrast" min="-100" max="100" value="0">
-            </div>
-            <div class="slider-container">
-                <label for="saturation">飽和度: <span id="saturation-value">0</span></label>
-                <input type="range" id="saturation" min="-100" max="100" value="0">
-            </div>
-        </div>
-        <div class="button-container">
-            <button class="download-btn" id="reset-filters">
-                <img src="assets/pic/重置調整.png" alt="重置調整" class="filter-img-btn">
-            </button>
-        </div>
-    </div>
-
-
     <div class="download-section">
         <div class="button-container">
             <button class="download-btn" id="download-btn">
@@ -133,11 +107,9 @@
         @media (max-width: 480px) {
             .frames-section {
                 height: 26px !important;
-            }
-
-            img[alt="調整照片"] {
-                height: 26px !important;
-                max-height: 26px !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
             }
 
             .camera-btn-container {

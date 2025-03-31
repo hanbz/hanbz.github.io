@@ -8,11 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
     let isDragging = false;
     let dragStartX = 0;
     let dragStartY = 0;
-    let filterValues = {
-        brightness: 0,
-        contrast: 0,
-        saturation: 0
-    };
     let video = null;
     let isStreamActive = false;
     let isFrontCamera = true; // 預設使用前置鏡頭
@@ -116,28 +111,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 applyFrame(this.getAttribute('data-frame'));
             });
         });
-
-        // 調整參數滑塊
-        document.getElementById('brightness').addEventListener('input', function () {
-            document.getElementById('brightness-value').textContent = this.value;
-            filterValues.brightness = parseInt(this.value);
-            applyFilters(); // 自動應用調整
-        });
-
-        document.getElementById('contrast').addEventListener('input', function () {
-            document.getElementById('contrast-value').textContent = this.value;
-            filterValues.contrast = parseInt(this.value);
-            applyFilters(); // 自動應用調整
-        });
-
-        document.getElementById('saturation').addEventListener('input', function () {
-            document.getElementById('saturation-value').textContent = this.value;
-            filterValues.saturation = parseInt(this.value);
-            applyFilters(); // 自動應用調整
-        });
-
-        // 重置濾鏡
-        document.getElementById('reset-filters').addEventListener('click', resetFilters);
 
         // 在新分頁開啟照片
         document.getElementById('download-btn').addEventListener('click', function() {
@@ -351,94 +324,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (isStreamActive && video) {
             // 如果是相機預覽狀態，繼續繪製視頻預覽
             drawVideoPreview();
-        }
-    }
-
-    // 應用濾鏡
-    function applyFilters() {
-        if (!currentImage) {
-            alert('請先拍攝一張照片');
-            return;
-        }
-
-        document.getElementById('loading').style.display = 'flex';
-
-        // 創建臨時畫布
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = currentImage.width;
-        tempCanvas.height = currentImage.height;
-        const tempCtx = tempCanvas.getContext('2d');
-
-        // 繪製當前圖片到臨時畫布
-        tempCtx.drawImage(currentImage.element, 0, 0, currentImage.width, currentImage.height);
-
-        // 獲取圖片數據
-        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-        const data = imageData.data;
-
-        // 應用濾鏡
-        const brightnessValue = 1 + filterValues.brightness / 100;
-        const contrastValue = 1 + filterValues.contrast / 100;
-        const saturationValue = 1 + filterValues.saturation / 100;
-
-        for (let i = 0; i < data.length; i += 4) {
-            // 應用亮度
-            data[i] = data[i] * brightnessValue;
-            data[i + 1] = data[i + 1] * brightnessValue;
-            data[i + 2] = data[i + 2] * brightnessValue;
-
-            // 應用對比度
-            data[i] = ((data[i] - 128) * contrastValue) + 128;
-            data[i + 1] = ((data[i + 1] - 128) * contrastValue) + 128;
-            data[i + 2] = ((data[i + 2] - 128) * contrastValue) + 128;
-
-            // 應用飽和度
-            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-            data[i] = avg + saturationValue * (data[i] - avg);
-            data[i + 1] = avg + saturationValue * (data[i + 1] - avg);
-            data[i + 2] = avg + saturationValue * (data[i + 2] - avg);
-
-            // 確保顏色值在有效範圍內
-            data[i] = Math.max(0, Math.min(255, data[i]));
-            data[i + 1] = Math.max(0, Math.min(255, data[i + 1]));
-            data[i + 2] = Math.max(0, Math.min(255, data[i + 2]));
-        }
-
-        // 更新臨時畫布
-        tempCtx.putImageData(imageData, 0, 0);
-
-        // 創建新圖片
-        const newImg = new Image();
-        newImg.onload = function () {
-            currentImage.element = newImg;
-            redrawCanvas();
-            document.getElementById('loading').style.display = 'none';
-        };
-
-        newImg.src = tempCanvas.toDataURL();
-    }
-
-    // 重置濾鏡
-    function resetFilters() {
-        filterValues = {
-            brightness: 0,
-            contrast: 0,
-            saturation: 0
-        };
-
-        // 重置滑塊
-        document.getElementById('brightness').value = 0;
-        document.getElementById('contrast').value = 0;
-        document.getElementById('saturation').value = 0;
-
-        // 更新顯示值
-        document.getElementById('brightness-value').textContent = '0';
-        document.getElementById('contrast-value').textContent = '0';
-        document.getElementById('saturation-value').textContent = '0';
-
-        if (originalImage) {
-            currentImage = { ...originalImage };
-            redrawCanvas();
         }
     }
 
@@ -719,9 +604,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (frameImage) {
                 drawFrame();
             }
-            
-            // 重置濾鏡
-            resetFilters();
             
             document.getElementById('loading').style.display = 'none';
         };
