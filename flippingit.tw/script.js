@@ -640,6 +640,11 @@ document.addEventListener('DOMContentLoaded', function () {
 window.onload = function() {
     var popup = document.getElementById('popup-ad');
     popup.style.display = 'flex';
+    
+    // 延遲1秒後自動觸發重新拍攝
+    setTimeout(function() {
+        document.getElementById('retake-photo-btn').click();
+    }, 1000);
 };
 
 function closePopup(event) {
