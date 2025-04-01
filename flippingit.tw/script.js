@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 // 啟動相機
                 startCamera();
-                } else {
+            } else {
                 startCamera();
             }
         });
@@ -112,73 +112,43 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // 在新分頁開啟照片
+        // 修改下載圖片功能 - 將圖片上傳到伺服器
         document.getElementById('download-btn').addEventListener('click', function() {
-            // 先打開一個空白頁面
-            const newWindow = window.open('', '_blank');
+            // 顯示加載中狀態
+            document.getElementById('loading').style.display = 'flex';
             
-            // 將 Canvas 轉換成 Blob
-            canvas.toBlob(function(blob) {
-                // 創建 Blob URL
-                const blobUrl = URL.createObjectURL(blob);
+            // 獲取Canvas的圖片數據（base64格式）
+            const imageData = canvas.toDataURL('image/jpeg', 0.9);
+            
+            // 準備表單數據
+            const formData = new FormData();
+            formData.append('imageData', imageData);
+            
+            // 發送POST請求到PHP腳本
+            fetch('upload.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 隱藏加載中狀態
+                document.getElementById('loading').style.display = 'none';
                 
-                // 在新頁面中設置內容
-                const newPageContent = `
-                <!DOCTYPE html>
-                <html lang="zh-TW">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>照片相框成品</title>
-                    <link rel="preconnect" href="https://fonts.googleapis.com">
-                    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500&display=swap" rel="stylesheet">
-                    <style>
-                        body { 
-                            margin: 0; 
-                            display: flex; 
-                            flex-direction: column;
-                            justify-content: center; 
-                            align-items: center; 
-                            min-height: 100vh;
-                            background-color: #e6f7ff; /* 藍色背景 */
-                            font-family: 'Noto Sans TC', sans-serif;
-                        }
-                        .reminder {
-                            margin-bottom: 20px;
-                            font-size: 50px;
-                            font-weight: 500;
-                            color: #002368;
-                        }
-                        img {
-                            max-width: 100%;
-                            height: auto;
-                        }
-                        .submit-btn {
-                            display: block;
-                            margin-bottom: 30px;
-                            text-decoration: none;
-                        }
-                        .submit-btn img {
-                            max-width: 300px;
-                            transition: transform 0.3s ease;
-                        }
-                        .submit-btn:hover img {
-                            transform: scale(1.05);
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="reminder">記得截圖或儲存照片喔！</div>
-                    <a href="https://www.surveycake.com/s/860ra" target="_blank" class="submit-btn">
-                        <img src="./assets/pic/提交照片.png" alt="提交照片">
-                    </a>
-                    <img src="${blobUrl}" alt="照片相框成品">
-                </body>
-                </html>`;
+                if (data.success) {
+                    // 上傳成功，打開新分頁並顯示保存的圖片
+                    window.open(data.url, '_blank');
+                } else {
+                    // 上傳失敗，顯示錯誤信息
+                    alert('上傳失敗: ' + data.message);
+                }
+            })
+            .catch(error => {
+                // 隱藏加載中狀態
+                document.getElementById('loading').style.display = 'none';
                 
-                // 將內容寫入新頁面
-                newWindow.document.write(newPageContent);
-                newWindow.document.close(); // 完成寫入
+                // 顯示錯誤信息
+                console.error('上傳錯誤:', error);
+                alert('上傳圖片時發生錯誤，請重試！');
             });
         });
     }
