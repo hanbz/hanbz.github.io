@@ -138,8 +138,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('loading').style.display = 'none';
                 
                 if (data.success) {
-                    // 上傳成功，打開新分頁並顯示保存的圖片
-                    window.open(data.url, '_blank');
+                    // 上傳成功，在當前分頁導航到保存的圖片
+                    window.location.href = data.url;
                 } else {
                     // 上傳失敗，顯示錯誤信息
                     alert('上傳失敗: ' + data.message);
