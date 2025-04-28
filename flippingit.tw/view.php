@@ -35,6 +35,15 @@ $localPath = '.' . $path;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500&display=swap" rel="stylesheet">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM7N92TDGN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-SM7N92TDGN');
+    </script>
     <style>
         body {
             margin: 0;
@@ -129,11 +138,13 @@ $localPath = '.' . $path;
             display: block;
             text-decoration: none;
         }
+
         .submit-img-btn {
             max-width: 300px;
             height: auto;
             transition: transform 0.3s ease;
         }
+
         .submit-btn:hover .submit-img-btn {
             transform: scale(1.05);
         }
